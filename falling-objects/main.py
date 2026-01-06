@@ -105,6 +105,14 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_r and game_over:
+                    main()
+                    return
+
+                if event.key == pygame.K_ESCAPE and game_over:
+                    running = False
         
         if not game_over:
             score, health, game_over = handle_object(
