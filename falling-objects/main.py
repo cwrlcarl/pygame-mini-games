@@ -39,19 +39,21 @@ def draw_window(player_rect, object_rect, score, health, game_over):
     screen.blit(health_text, (15, 35))
 
     if game_over:
-        draw_game_over_screen()
-
+        show_game_over()
+        
     pygame.display.update()
 
 
-def draw_game_over_screen():
+def show_game_over():
     game_over_text = game_over_font.render(":(", True, MAIN_TEXT_COLOR)
-    screen.blit(game_over_text,((SCREEN_WIDTH // 2) - (game_over_text.get_width() // 2),
-                (SCREEN_HEIGHT // 2) - (game_over_text.get_height())))
+    game_over_text_x = (SCREEN_WIDTH - game_over_text.get_width()) // 2 
+    game_over_text_y = (SCREEN_HEIGHT // 2) - game_over_text.get_height() - 5
+    screen.blit(game_over_text,(game_over_text_x, game_over_text_y))
     
     instructions_text = subtext_font.render("Press R to restart | ESC to quit", True, SUBTEXT_COLOR)
-    screen.blit(instructions_text, ((SCREEN_WIDTH // 2) - (instructions_text.get_width() // 2),
-                (SCREEN_HEIGHT // 2) + (instructions_text.get_height() + 10)))
+    instructions_text_x = (SCREEN_WIDTH - instructions_text.get_width()) // 2
+    instructions_text_y = (SCREEN_HEIGHT // 2) + instructions_text.get_height() + 5
+    screen.blit(instructions_text, (instructions_text_x, instructions_text_y))
 
 
 def handle_movement(player_rect):
@@ -72,7 +74,6 @@ def handle_object(object_rect, player_rect, score, health, game_over):
 
         if health <= 0:
             game_over = True
-            print("Game Over")
 
     if player_rect.colliderect(object_rect):
         score += 10
@@ -87,16 +88,15 @@ def reset_object(object_rect):
 
 
 def main():
+    player_x = (SCREEN_WIDTH - PLAYER_WIDTH) // 2
+    player_y = SCREEN_HEIGHT - PLAYER_HEIGHT - 20
+
+    player_rect = pygame.Rect(player_x, player_y, PLAYER_WIDTH, PLAYER_HEIGHT)
+    object_rect = pygame.Rect(X_POS, Y_POS, RADIUS * 2, RADIUS * 2)
+    
     score = 0
     health = 3
     game_over = False
-    
-    player_rect = pygame.Rect(((SCREEN_WIDTH // 2) - (PLAYER_WIDTH // 2),
-                                SCREEN_HEIGHT - PLAYER_HEIGHT - 20,
-                                PLAYER_WIDTH, PLAYER_HEIGHT))
-    
-    object_rect = pygame.Rect((X_POS, Y_POS,
-                               RADIUS * 2, RADIUS * 2))
     
     clock = pygame.time.Clock()
     running = True
@@ -105,13 +105,19 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+        
+        if not game_over:
+            score, health, game_over = handle_object(
+                object_rect, player_rect,
+                score, health, game_over
+            )
+            handle_movement(player_rect)
 
-            if event.type == pygame.K_r:
-                running = False
+        draw_window(
+            player_rect, object_rect,
+            score, health, game_over
+        )
 
-        score, health, game_over = handle_object(object_rect, player_rect, score, health, game_over)
-        handle_movement(player_rect)
-        draw_window(player_rect, object_rect, score, health, game_over)
         clock.tick(FPS)
 
     pygame.quit()
