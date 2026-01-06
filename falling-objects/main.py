@@ -1,29 +1,41 @@
 import pygame
 import random
+import os
 
 pygame.init()
 
+SCREEN_WIDTH, SCREEN_HEIGHT = 570, 400
 FPS = 60
-SCREEN_WIDTH, SCREEN_HEIGHT = 550, 400
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Catch the flying ahh object")
+
 main_screen_font = pygame.font.SysFont("Monocraft", 17)
 game_over_font = pygame.font.SysFont("Monocraft", 80)
 subtext_font = pygame.font.SysFont("Monocraft", 13)
 
-PLAYER_WIDTH, PLAYER_HEIGHT = 70, 15
-PLAYER_SPEED = 4
+BASE_DIR = os.path.dirname(__file__)
+ASSETS_DIR = os.path.join(BASE_DIR, 'assets')
+catch_sfx = os.path.join(ASSETS_DIR, 'catch-sfx.wav')
+fall_sfx = os.path.join(ASSETS_DIR, 'fall-sfx.wav')
+game_over_sfx = os.path.join(ASSETS_DIR, 'game-over-sfx.ogg')
 
-X_POS, Y_POS = random.randint(0, SCREEN_WIDTH - 50), -50
-RADIUS = 20
-FALL_SPEED = 4
+catch_sfx = pygame.mixer.Sound(catch_sfx)
+fall_sfx = pygame.mixer.Sound(fall_sfx)
+game_over_sfx = pygame.mixer.Sound(game_over_sfx)
 
 BG_COLOR = (0, 0, 0)
 MAIN_TEXT_COLOR = (255, 255, 255)
 SUBTEXT_COLOR = (171, 171, 171)
 PLAYER_COLOR = (224, 108, 152)
 OBJECT_COLOR = (255, 151, 33)
+
+PLAYER_WIDTH, PLAYER_HEIGHT = 70, 15
+PLAYER_SPEED = 4
+
+X_POS, Y_POS = random.randint(0, SCREEN_WIDTH - 50), -100
+RADIUS = 20
+FALL_SPEED = 5
 
 
 def draw_window(player_rect, object_rect, score, health, game_over):
@@ -71,13 +83,16 @@ def handle_object(object_rect, player_rect, score, health, game_over):
     if object_rect.y > SCREEN_HEIGHT:
         health -= 1
         reset_object(object_rect)
+        fall_sfx.play()
 
         if health <= 0:
             game_over = True
+            game_over_sfx.play()
 
     if player_rect.colliderect(object_rect):
         score += 10
         reset_object(object_rect)
+        catch_sfx.play()
     
     return score, health, game_over
 
