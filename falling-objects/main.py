@@ -33,9 +33,9 @@ OBJECT_COLOR = (255, 151, 33)
 PLAYER_WIDTH, PLAYER_HEIGHT = 70, 15
 PLAYER_SPEED = 4
 
-X_POS, Y_POS = random.randint(0, SCREEN_WIDTH - 50), -100
 RADIUS = 20
 FALL_SPEED = 5
+SPAWN_Y = -100
 
 
 def draw_window(player_rect, object_rect, score, health, game_over):
@@ -85,7 +85,7 @@ def handle_object(object_rect, player_rect, score, health, game_over):
         reset_object(object_rect)
         fall_sfx.play()
 
-        if health <= 0:
+        if health <= 0 and not game_over:
             game_over = True
             game_over_sfx.play()
 
@@ -99,15 +99,31 @@ def handle_object(object_rect, player_rect, score, health, game_over):
 
 def reset_object(object_rect):
     object_rect.x = random.randint(0, SCREEN_WIDTH - RADIUS * 2)
-    object_rect.y = Y_POS
+    object_rect.y = SPAWN_Y
+
+
+def reset_game():
+    player_x = (SCREEN_WIDTH - PLAYER_WIDTH) // 2
+    player_y = SCREEN_HEIGHT - PLAYER_HEIGHT - 20
+    player_rect = pygame.Rect(player_x, player_y, PLAYER_WIDTH, PLAYER_HEIGHT)
+
+    object_rect = pygame.Rect(0, SPAWN_Y, RADIUS * 2, RADIUS * 2)
+    reset_object(object_rect)
+
+    score = 0
+    health = 3
+    game_over = False
+
+    return player_rect, object_rect, score, health, game_over
 
 
 def main():
     player_x = (SCREEN_WIDTH - PLAYER_WIDTH) // 2
     player_y = SCREEN_HEIGHT - PLAYER_HEIGHT - 20
-
     player_rect = pygame.Rect(player_x, player_y, PLAYER_WIDTH, PLAYER_HEIGHT)
-    object_rect = pygame.Rect(X_POS, Y_POS, RADIUS * 2, RADIUS * 2)
+
+    object_rect = pygame.Rect(0, SPAWN_Y, RADIUS * 2, RADIUS * 2)
+    reset_object(object_rect)
     
     score = 0
     health = 3
@@ -123,8 +139,7 @@ def main():
 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_r and game_over:
-                    main()
-                    return
+                    player_rect, object_rect, score, health, game_over = reset_game()
 
                 if event.key == pygame.K_ESCAPE and game_over:
                     running = False
