@@ -3,7 +3,7 @@ import random
 
 pygame.init()
 
-SCREEN_WIDTH, SCREEN_HEIGHT = 500, 500
+SCREEN_WIDTH, SCREEN_HEIGHT = 400, 500
 FPS = 60
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -22,21 +22,36 @@ OBJECT_COLOR = (209, 73, 73)
 PLAYER_WIDTH, PLAYER_HEIGHT = 50, 50
 PLAYER_SPEED = 4
 
+RADIUS = 20
+FALL_SPEED = 7
+SPAWN_Y = -100
 
-def draw_window(player_rect, score, game_over):
+
+def draw_window(player_rect, object_rect, score, game_over):
     screen.fill(BG_COLOR)
 
     pygame.draw.rect(screen, PLAYER_COLOR, player_rect)
+    pygame.draw.circle(screen, OBJECT_COLOR, object_rect.center, RADIUS)
     
-    time_text = time_font.render(f"Time: {score}", True, MAIN_TEXT_COLOR)
-    screen.blit(time_text, (15, 15))
+    time_text = time_font.render(f"Score: {score}", True, MAIN_TEXT_COLOR)
+    screen.blit(time_text, (15, 12))
 
     if game_over:
-        game_over_text = game_over_font.render(":(", True, MAIN_TEXT_COLOR)
-        screen.blit(game_over_text, ((SCREEN_WIDTH - game_over_text.get_width()) // 2,
-                                     (SCREEN_HEIGHT - game_over_text.get_height()) // 2))
+        show_game_over()
 
     pygame.display.update()
+
+
+def show_game_over():
+    game_over_text = game_over_font.render(":(", True, MAIN_TEXT_COLOR)
+    game_over_text_x = (SCREEN_WIDTH - game_over_text.get_width()) // 2 
+    game_over_text_y = (SCREEN_HEIGHT // 2) - game_over_text.get_height()
+    screen.blit(game_over_text,(game_over_text_x, game_over_text_y))
+
+    instructions_text = subtext_font.render("Press R to restart | ESC to quit", True, SUBTEXT_COLOR)
+    instructions_text_x = (SCREEN_WIDTH - instructions_text.get_width()) // 2
+    instructions_text_y = (SCREEN_HEIGHT // 2) + instructions_text.get_height() + 10
+    screen.blit(instructions_text, (instructions_text_x, instructions_text_y))
 
 
 def handle_movement(player_rect):
@@ -48,10 +63,44 @@ def handle_movement(player_rect):
         player_rect.x += PLAYER_SPEED
 
 
+def handle_object(object_rect, player_rect, game_over):
+    object_rect.y += FALL_SPEED
+
+    if object_rect.y > SCREEN_HEIGHT:
+        reset_object(object_rect)
+
+    if player_rect.colliderect(object_rect):
+        game_over = True
+
+    return game_over
+
+
+def reset_game():
+    player_x = (SCREEN_WIDTH - PLAYER_WIDTH) // 2
+    player_y = SCREEN_HEIGHT - PLAYER_HEIGHT
+    player_rect = pygame.Rect(player_x, player_y, PLAYER_WIDTH, PLAYER_HEIGHT)
+
+    object_rect = pygame.Rect(0, SPAWN_Y, RADIUS * 2, RADIUS * 2)
+    reset_object(object_rect)
+
+    score = 0
+    game_over = False
+
+    return player_rect, object_rect, score, game_over
+
+
+def reset_object(object_rect):
+    object_rect.x = random.randint(0, SCREEN_WIDTH - RADIUS * 2)
+    object_rect.y = SPAWN_Y
+
+
 def main():
     player_x = (SCREEN_WIDTH - PLAYER_WIDTH) // 2
     player_y = SCREEN_HEIGHT - PLAYER_HEIGHT
     player_rect = pygame.Rect(player_x, player_y, PLAYER_WIDTH, PLAYER_HEIGHT)
+
+    object_rect = pygame.Rect(0, SPAWN_Y, RADIUS * 2, RADIUS * 2)
+    reset_object(object_rect)
 
     score = 0
     game_over = False
@@ -63,9 +112,19 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+            
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_r and game_over:
+                    player_rect, object_rect, score, game_over = reset_game()
+                
+                if event.key == pygame.K_ESCAPE and game_over:
+                    running = False
 
-        draw_window(player_rect, score, game_over)
-        handle_movement(player_rect)
+        if not game_over:
+            game_over = handle_object(object_rect, player_rect, game_over)
+            handle_movement(player_rect)
+            
+        draw_window(player_rect, object_rect, score, game_over)
 
         clock.tick(FPS)
 
