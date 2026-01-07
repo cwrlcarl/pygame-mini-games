@@ -1,5 +1,6 @@
 import pygame
 import random
+import os
 
 pygame.init()
 
@@ -12,6 +13,15 @@ pygame.display.set_caption("Dodge the falling ahh object")
 time_font = pygame.font.SysFont("Monocraft", 17)
 game_over_font = pygame.font.SysFont("Monocraft", 80)
 subtext_font = pygame.font.SysFont("Monocraft", 12)
+
+BASE_DIR = os.path.dirname(__file__)
+ASSETS_DIR = os.path.join(BASE_DIR, 'assets')
+bg_music = os.path.join(ASSETS_DIR, 'bg-music.mp3')
+game_over_sfx = os.path.join(ASSETS_DIR, 'game-over-sfx.ogg')
+
+pygame.mixer.music.load(bg_music)
+pygame.mixer.music.set_volume(0.3)
+game_over_sfx = pygame.mixer.Sound(game_over_sfx)
 
 BG_COLOR = (240, 240, 245)
 MAIN_TEXT_COLOR = (22, 22, 23)
@@ -69,13 +79,17 @@ def handle_object(object_rect, player_rect, game_over):
     if object_rect.y > SCREEN_HEIGHT:
         reset_object(object_rect)
 
-    if player_rect.colliderect(object_rect):
+    if player_rect.colliderect(object_rect) and not game_over:
         game_over = True
+        game_over_sfx.play()
+        pygame.mixer.music.stop()
 
     return game_over
 
 
 def reset_game():
+    pygame.mixer.music.play(-1)
+
     player_x = (SCREEN_WIDTH - PLAYER_WIDTH) // 2
     player_y = SCREEN_HEIGHT - PLAYER_HEIGHT
     player_rect = pygame.Rect(player_x, player_y, PLAYER_WIDTH, PLAYER_HEIGHT)
@@ -95,6 +109,8 @@ def reset_object(object_rect):
 
 
 def main():
+    pygame.mixer.music.play(-1)
+
     player_x = (SCREEN_WIDTH - PLAYER_WIDTH) // 2
     player_y = SCREEN_HEIGHT - PLAYER_HEIGHT
     player_rect = pygame.Rect(player_x, player_y, PLAYER_WIDTH, PLAYER_HEIGHT)
@@ -125,7 +141,6 @@ def main():
             handle_movement(player_rect)
             
         draw_window(player_rect, object_rect, score, game_over)
-
         clock.tick(FPS)
 
     pygame.quit()
