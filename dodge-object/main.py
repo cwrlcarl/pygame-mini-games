@@ -4,13 +4,13 @@ import os
 
 pygame.init()
 
-SCREEN_WIDTH, SCREEN_HEIGHT = 400, 500
+SCREEN_WIDTH, SCREEN_HEIGHT = 400, 450
 FPS = 60
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Dodge the falling ahh object")
 
-time_font = pygame.font.SysFont("Monocraft", 17)
+score_font = pygame.font.SysFont("Monocraft", 17)
 game_over_font = pygame.font.SysFont("Monocraft", 80)
 subtext_font = pygame.font.SysFont("Monocraft", 12)
 
@@ -23,13 +23,13 @@ pygame.mixer.music.load(bg_music)
 pygame.mixer.music.set_volume(0.3)
 game_over_sfx = pygame.mixer.Sound(game_over_sfx)
 
-BG_COLOR = (240, 240, 245)
+BG_COLOR = (255, 255, 255)
 MAIN_TEXT_COLOR = (22, 22, 23)
 SUBTEXT_COLOR = (73, 73, 77)
 PLAYER_COLOR = (73, 73, 209)
 OBJECT_COLOR = (209, 73, 73)
 
-PLAYER_WIDTH, PLAYER_HEIGHT = 50, 50
+PLAYER_WIDTH, PLAYER_HEIGHT = 40, 40
 PLAYER_SPEED = 4
 
 RADIUS = 20
@@ -43,8 +43,11 @@ def draw_window(player_rect, object_rect, score, game_over):
     pygame.draw.rect(screen, PLAYER_COLOR, player_rect)
     pygame.draw.circle(screen, OBJECT_COLOR, object_rect.center, RADIUS)
     
-    time_text = time_font.render(f"Score: {score}", True, MAIN_TEXT_COLOR)
+    time_text = score_font.render(f"Score: {score:.2f}", True, MAIN_TEXT_COLOR)
     screen.blit(time_text, (15, 12))
+
+    high_score_text = score_font.render("High Score:", True, MAIN_TEXT_COLOR)
+    screen.blit(high_score_text, (15, 40))
 
     if game_over:
         show_game_over()
@@ -73,8 +76,8 @@ def handle_movement(player_rect):
         player_rect.x += PLAYER_SPEED
 
 
-def handle_object(object_rect, player_rect, game_over):
-    object_rect.y += FALL_SPEED
+def handle_object(object_rect, player_rect, fall_speed, game_over):
+    object_rect.y += fall_speed
 
     if object_rect.y > SCREEN_HEIGHT:
         reset_object(object_rect)
@@ -120,11 +123,18 @@ def main():
 
     score = 0
     game_over = False
+    fall_speed = FALL_SPEED
+    next_speed_increase = 10
 
     clock = pygame.time.Clock()
     running = True
     
     while running:
+        dt = clock.tick(FPS)
+        if score >= next_speed_increase:
+            fall_speed += 1
+            next_speed_increase += 10
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
@@ -137,11 +147,11 @@ def main():
                     running = False
 
         if not game_over:
-            game_over = handle_object(object_rect, player_rect, game_over)
+            game_over = handle_object(object_rect, player_rect, fall_speed, game_over)
             handle_movement(player_rect)
+            score += dt / 1000
             
         draw_window(player_rect, object_rect, score, game_over)
-        clock.tick(FPS)
 
     pygame.quit()
 
