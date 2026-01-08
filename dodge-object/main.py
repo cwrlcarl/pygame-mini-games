@@ -37,16 +37,16 @@ FALL_SPEED = 7
 SPAWN_Y = -100
 
 
-def draw_window(player_rect, object_rect, score, game_over):
+def draw_window(player_rect, object_rect, score, high_score, game_over):
     screen.fill(BG_COLOR)
 
     pygame.draw.rect(screen, PLAYER_COLOR, player_rect)
     pygame.draw.circle(screen, OBJECT_COLOR, object_rect.center, RADIUS)
     
-    time_text = score_font.render(f"Score: {score:.2f}", True, MAIN_TEXT_COLOR)
+    time_text = score_font.render(f"Score: {score:.0f}", True, MAIN_TEXT_COLOR)
     screen.blit(time_text, (15, 12))
 
-    high_score_text = score_font.render("High Score:", True, MAIN_TEXT_COLOR)
+    high_score_text = score_font.render(f"High Score: {high_score:.0f}", True, MAIN_TEXT_COLOR)
     screen.blit(high_score_text, (15, 40))
 
     if game_over:
@@ -102,8 +102,9 @@ def reset_game():
 
     score = 0
     game_over = False
+    fall_speed = FALL_SPEED
 
-    return player_rect, object_rect, score, game_over
+    return player_rect, object_rect, score, fall_speed, game_over
 
 
 def reset_object(object_rect):
@@ -122,15 +123,17 @@ def main():
     reset_object(object_rect)
 
     score = 0
-    game_over = False
+    high_score = 0
     fall_speed = FALL_SPEED
     next_speed_increase = 10
+    game_over = False
 
     clock = pygame.time.Clock()
     running = True
     
     while running:
         dt = clock.tick(FPS)
+
         if score >= next_speed_increase:
             fall_speed += 1
             next_speed_increase += 10
@@ -141,7 +144,7 @@ def main():
             
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_r and game_over:
-                    player_rect, object_rect, score, game_over = reset_game()
+                    player_rect, object_rect, score, fall_speed, game_over = reset_game()
                 
                 if event.key == pygame.K_ESCAPE and game_over:
                     running = False
@@ -150,8 +153,11 @@ def main():
             game_over = handle_object(object_rect, player_rect, fall_speed, game_over)
             handle_movement(player_rect)
             score += dt / 1000
+        else:
+            if score > high_score:
+                high_score = score
             
-        draw_window(player_rect, object_rect, score, game_over)
+        draw_window(player_rect, object_rect, score, high_score, game_over)
 
     pygame.quit()
 
