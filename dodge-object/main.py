@@ -102,7 +102,7 @@ def reset_game():
 
     score = 0
     fall_speed = FALL_SPEED
-    next_speed_increase = 2
+    next_speed_increase = 10
     game_over = False
 
     return player_rect, object_rect, score, fall_speed, next_speed_increase, game_over
@@ -126,7 +126,7 @@ def main():
     score = 0
     high_score = 0
     fall_speed = FALL_SPEED
-    next_speed_increase = 2
+    next_speed_increase = 10
     game_over = False
 
     clock = pygame.time.Clock()
@@ -137,7 +137,7 @@ def main():
 
         if score >= next_speed_increase:
             fall_speed += 1
-            next_speed_increase += 2
+            next_speed_increase += 10
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
