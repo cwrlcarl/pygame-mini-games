@@ -20,37 +20,48 @@ def draw_window(score, health, ball, paddle):
     pygame.display.update()
 
 
-def handle_ball(ball, ball_dx, ball_dy, paddle, health):
-    ball.x += ball_dx
-    ball.y += ball_dy
+def handle_ball(move_ball, ball, ball_dx, ball_dy, paddle, health):
+    if move_ball:
+        ball.x += ball_dx
+        ball.y += ball_dy
 
-    if ball.left <= 0:
-        ball_dx *= -1
-        ball.left = 0
-    if ball.right >= SCREEN_WIDTH:
-        ball_dx *= -1
-        ball.right = SCREEN_WIDTH
-    if ball.top <= 0:
-        ball_dy *= -1
-        ball.top = 0
+        if ball.left <= 0:
+            ball_dx *= -1
+            ball.left = 0
+        if ball.right >= SCREEN_WIDTH:
+            ball_dx *= -1
+            ball.right = SCREEN_WIDTH
+        if ball.top <= 0:
+            ball_dy *= -1
+            ball.top = 0
 
-    if ball.colliderect(paddle):
-        ball_dy *= -1
+        if ball.colliderect(paddle):
+            ball_dy *= -1
 
-    if ball.bottom >= SCREEN_HEIGHT:
-        health -= 1
-        spawn_ball(ball)
+        if ball.bottom >= SCREEN_HEIGHT:
+            health -= 1
+            spawn_ball(ball)
 
     return ball_dx, ball_dy, health
 
 
-def handle_paddle(paddle):
+def handle_entities(paddle, ball, move_ball):
+    if not move_ball:
+        handle_movement(paddle, ball)
+
+    handle_movement(paddle, paddle)
+
+
+def handle_movement(paddle, entity):
     keys = pygame.key.get_pressed()
 
-    if (keys[pygame.K_a] or keys[pygame.K_LEFT]) and paddle.x > 0:
-        paddle.x -= PADDLE_SPEED
-    if (keys[pygame.K_d] or keys[pygame.K_RIGHT]) and paddle.x < SCREEN_WIDTH - PADDLE_WIDTH:
-        paddle.x += PADDLE_SPEED
+    if (keys[pygame.K_a] or keys[pygame.K_LEFT]) \
+    and paddle.x > 0:
+        entity.x -= PADDLE_SPEED
+
+    if (keys[pygame.K_d] or keys[pygame.K_RIGHT]) \
+    and paddle.x < SCREEN_WIDTH - PADDLE_WIDTH:
+        entity.x += PADDLE_SPEED
 
 
 def spawn_ball(ball):
@@ -68,6 +79,7 @@ def main():
 
     ball_dx = random.choice([-4, 4])
     ball_dy = -5
+    move_ball = False
 
     score = 0
     health = 3
@@ -83,8 +95,15 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
 
-        handle_paddle(paddle)
-        ball_dx, ball_dy, health = handle_ball(ball, ball_dx, ball_dy, paddle, health)
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    move_ball = True
+        
+        handle_entities(paddle, ball, move_ball)
+        ball_dx, ball_dy, health = handle_ball(
+            move_ball, ball, ball_dx,
+            ball_dy, paddle, health
+        )
         draw_window(score, health, ball, paddle)
 
     pygame.quit()
