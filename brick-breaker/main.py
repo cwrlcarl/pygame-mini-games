@@ -36,23 +36,27 @@ def handle_ball(move_ball, ball, ball_dx, ball_dy, paddle, health):
             ball.top = 0
 
         if ball.colliderect(paddle):
-            ball_dy *= -1
-
-        if ball.bottom >= SCREEN_HEIGHT:
+            if ball_dy > 0:
+                ball.bottom = paddle.top
+                ball_dy *= -1
+            else:
+                ball_dy *= -1
+    
+        if ball.top >= SCREEN_HEIGHT:
             health -= 1
-            spawn_ball(ball)
+            ball_dx, ball_dy, move_ball = spawn_ball(ball, paddle)
 
-    return ball_dx, ball_dy, health
+    return ball_dx, ball_dy, move_ball, health
 
 
 def handle_entities(paddle, ball, move_ball):
     if not move_ball:
-        handle_movement(paddle, ball)
+        handle_entities_movement(paddle, ball)
 
-    handle_movement(paddle, paddle)
+    handle_entities_movement(paddle, paddle)
 
 
-def handle_movement(paddle, entity):
+def handle_entities_movement(paddle, entity):
     keys = pygame.key.get_pressed()
 
     if (keys[pygame.K_a] or keys[pygame.K_LEFT]) \
@@ -64,25 +68,31 @@ def handle_movement(paddle, entity):
         entity.x += PADDLE_SPEED
 
 
-def spawn_ball(ball):
-    ball.x = (SCREEN_WIDTH - BALL_SIZE) // 2
-    ball.y = SCREEN_HEIGHT - 70
+def spawn_ball(ball, paddle):
+    ball.centerx = paddle.centerx
+    ball.bottom = paddle.top - 5
+    
+    ball_dx = random.choice([-4, 4])
+    ball_dy = -5
+    move_ball = False
+
+    return ball_dx, ball_dy, move_ball
 
 
 def main():
-    paddle_x = (SCREEN_WIDTH - PADDLE_WIDTH) // 2
-    paddle_y = SCREEN_HEIGHT - 40
-    paddle = pygame.Rect(paddle_x, paddle_y, PADDLE_WIDTH, PADDLE_HEIGHT)
-
-    ball = pygame.Rect(0, 0, BALL_SIZE, BALL_SIZE)
-    spawn_ball(ball)
-
     ball_dx = random.choice([-4, 4])
     ball_dy = -5
     move_ball = False
 
     score = 0
     health = 3
+
+    paddle_x = (SCREEN_WIDTH - PADDLE_WIDTH) // 2
+    paddle_y = SCREEN_HEIGHT - 40
+    paddle = pygame.Rect(paddle_x, paddle_y, PADDLE_WIDTH, PADDLE_HEIGHT)
+
+    ball = pygame.Rect(0, 0, BALL_SIZE, BALL_SIZE)
+    spawn_ball(ball, paddle)
 
     pygame.mixer.music.play(-1)
     clock = pygame.time.Clock()
@@ -96,11 +106,11 @@ def main():
                 running = False
 
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:
+                if event.key == pygame.K_SPACE and not move_ball:
                     move_ball = True
         
         handle_entities(paddle, ball, move_ball)
-        ball_dx, ball_dy, health = handle_ball(
+        ball_dx, ball_dy, move_ball, health = handle_ball(
             move_ball, ball, ball_dx,
             ball_dy, paddle, health
         )
