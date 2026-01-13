@@ -7,7 +7,7 @@ pygame.init()
 def draw_screen(game_state):
     screen.fill(BG_COLOR)
 
-    score_text = main_window_font.render(f"Score: {game_state['score']:04d}", True, WHITE)
+    score_text = main_window_font.render(f"Score: {game_state['score']:05d}", True, WHITE)
     screen.blit(score_text, (15, 15))
 
     health_text = main_window_font.render(f"Health: {game_state['health']}", True, WHITE)
@@ -49,29 +49,57 @@ def handle_ball_collisions(game_state):
         # brick collision
         for brick in bricks:
             if ball.colliderect(brick):
+                brick_hit.play()
                 game_state['score'] += 50
-                game_state['ball_dy'] *= -1
+
+                left_overlap = ball.right - brick.left
+                right_overlap = brick.right - ball.left
+                top_overlap = ball.bottom - brick.top
+                bottom_overlap = brick.bottom - ball.top
+
+                min_overlap = min(left_overlap, right_overlap, top_overlap, bottom_overlap)
+
+                if min_overlap == top_overlap or min_overlap == bottom_overlap:
+                    game_state['ball_dy'] *= -1
+                else:
+                    game_state['ball_dx'] *= -1
+
                 bricks.remove(brick)
+                if len(bricks) == 0:
+                    game_state['move_ball'] = False
+                    respawn_ball(game_state)
+                    generate_bricks(game_state)
+                break
 
         # paddle collision
         if ball.colliderect(paddle):
+            paddle_hit.play()
             if game_state['ball_dy'] > 0:
                 ball.bottom = paddle.top
-                game_state['ball_dy'] *= -1
-            else:
-                game_state['ball_dy'] *= -1
+
+            game_state['ball_dy'] *= -1
+            game_state['ball_dx'] += random.choice([-0.3, 0, 0.3])
+
+            if game_state['ball_dx'] > 5:
+                game_state['ball_dx'] = 5
+            elif game_state['ball_dx'] < -5:
+                game_state['ball_dx'] = -5
 
         # wall collision
         if ball.left <= 0:
+            wall_hit.play()
             game_state['ball_dx'] *= -1
             ball.left = 0
         if ball.right >= SCREEN_WIDTH:
+            wall_hit.play()
             game_state['ball_dx'] *= -1
             ball.right = SCREEN_WIDTH
         if ball.top <= 0:
+            wall_hit.play()
             game_state['ball_dy'] *= -1
             ball.top = 0
         if ball.top >= SCREEN_HEIGHT:
+            ball_fall.play()
             game_state['health'] -= 1
 
             if game_state['health'] == 0:
@@ -104,7 +132,7 @@ def handle_entities_movement(paddle, entity):
 
 def respawn_ball(game_state):
     paddle = game_state['paddle']
-    ball = game_state['ball']  
+    ball = game_state['ball']
 
     ball.centerx = paddle.centerx
     ball.bottom = paddle.top - 5
@@ -114,12 +142,10 @@ def respawn_ball(game_state):
     game_state['move_ball'] = False
 
 
-def create_game_state():
-    pygame.mixer.music.play(-1)
-    
+def generate_bricks(game_state):
     row_width = (BRICK_WIDTH * BRICK_COLUMN + BRICK_GAP * (BRICK_COLUMN - 1))
-    bricks = []
-    
+    bricks = game_state['bricks']
+
     for row in range(BRICK_ROW):
         for col in range(BRICK_COLUMN):
             brick_x = col * (BRICK_WIDTH + BRICK_GAP) + (SCREEN_WIDTH - row_width) // 2
@@ -128,6 +154,10 @@ def create_game_state():
             brick = pygame.Rect(brick_x, brick_y, BRICK_WIDTH, BRICK_HEIGHT)
             bricks.append(brick)
 
+
+def create_game_state():
+    pygame.mixer.music.play(-1)
+
     paddle_x = (SCREEN_WIDTH - PADDLE_WIDTH) // 2
     paddle_y = SCREEN_HEIGHT - 40
     paddle = pygame.Rect(paddle_x, paddle_y, PADDLE_WIDTH, PADDLE_HEIGHT)
@@ -135,7 +165,7 @@ def create_game_state():
     ball = pygame.Rect(0, 0, BALL_SIZE, BALL_SIZE)
 
     game_state = {
-        'bricks': bricks,
+        'bricks': [],
         'paddle': paddle,
         'ball': ball,
         'ball_dx': random.choice([-4, 4]),
@@ -146,6 +176,7 @@ def create_game_state():
         'game_over': False
     }
 
+    generate_bricks(game_state)
     respawn_ball(game_state)
     return game_state
 
