@@ -19,10 +19,17 @@ subtext_font = pygame.font.SysFont("Monocraft", 12)
 BASE_DIR = os.path.dirname(__file__)
 ASSETS_DIR = os.path.join(BASE_DIR, 'assets')
 bg_music = os.path.join(ASSETS_DIR, 'bg-music.mp3')
+brick_hit = os.path.join(ASSETS_DIR, 'brick-hit.wav')
+wall_paddle_hit = os.path.join(ASSETS_DIR, 'wall-paddle-hit.wav')
+ball_fall = os.path.join(ASSETS_DIR, 'ball-fall.wav')
 game_over_sfx = os.path.join(ASSETS_DIR, 'game-over-sfx.ogg')
 
 pygame.mixer.music.load(bg_music)
-pygame.mixer.music.set_volume(0.1)
+pygame.mixer.music.set_volume(0.2)
+brick_hit = pygame.mixer.Sound(brick_hit)
+wall_hit = pygame.mixer.Sound(wall_paddle_hit)
+paddle_hit = pygame.mixer.Sound(wall_paddle_hit)
+ball_fall = pygame.mixer.Sound(ball_fall)
 game_over_sfx = pygame.mixer.Sound(game_over_sfx)
 
 # colors
@@ -41,7 +48,7 @@ BRICK_COLUMN = 7
 
 # paddle
 PADDLE_WIDTH, PADDLE_HEIGHT = 90, 10
-PADDLE_SPEED = 5
+PADDLE_SPEED = 7
 
 # ball
 BALL_SIZE = 25
