@@ -52,3 +52,4 @@ PADDLE_SPEED = 7
 
 # ball
 BALL_SIZE = 25
+BALL_OFFSET = 5
