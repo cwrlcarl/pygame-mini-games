@@ -38,7 +38,7 @@ def show_game_over():
 
 
 def handle_ball_collisions(game_state):
-    if game_state['move_ball']:
+    if game_state['launch_ball']:
         bricks = game_state['bricks']
         paddle = game_state['paddle']
         ball = game_state['ball']
@@ -52,21 +52,21 @@ def handle_ball_collisions(game_state):
                 brick_hit.play()
                 game_state['score'] += 50
 
-                left_overlap = ball.right - brick.left
-                right_overlap = brick.right - ball.left
-                top_overlap = ball.bottom - brick.top
-                bottom_overlap = brick.bottom - ball.top
+                overlap_left = ball.right - brick.left
+                overlap_right = brick.right - ball.left
+                overlap_top = ball.bottom - brick.top
+                overlap_bottom = brick.bottom - ball.top
 
-                min_overlap = min(left_overlap, right_overlap, top_overlap, bottom_overlap)
+                min_overlap = min(overlap_left, overlap_right, overlap_top, overlap_bottom)
 
-                if min_overlap == top_overlap or min_overlap == bottom_overlap:
+                if min_overlap == overlap_top or min_overlap == overlap_bottom:
                     game_state['ball_dy'] *= -1
                 else:
                     game_state['ball_dx'] *= -1
-
+                
                 bricks.remove(brick)
                 if len(bricks) == 0:
-                    game_state['move_ball'] = False
+                    game_state['launch_ball'] = False
                     respawn_ball(game_state)
                     generate_bricks(game_state)
                 break
@@ -74,6 +74,7 @@ def handle_ball_collisions(game_state):
         # paddle collision
         if ball.colliderect(paddle):
             paddle_hit.play()
+            
             if game_state['ball_dy'] > 0:
                 ball.bottom = paddle.top
 
@@ -114,20 +115,20 @@ def handle_entities(game_state):
     paddle = game_state['paddle']
     ball = game_state['ball']   
 
-    handle_entities_movement(paddle, paddle)
+    handle_paddle_movement(paddle)
 
-    if not game_state['move_ball']:
-        handle_entities_movement(paddle, ball)
+    if not game_state['launch_ball']:
+        ball.centerx = paddle.centerx
 
 
-def handle_entities_movement(paddle, entity):
+def handle_paddle_movement(paddle):
     keys = pygame.key.get_pressed()
 
     if (keys[pygame.K_a] or keys[pygame.K_LEFT]) and paddle.x > 0:
-        entity.x -= PADDLE_SPEED
+        paddle.x -= PADDLE_SPEED
 
     if (keys[pygame.K_d] or keys[pygame.K_RIGHT]) and paddle.x < SCREEN_WIDTH - PADDLE_WIDTH:
-        entity.x += PADDLE_SPEED
+        paddle.x += PADDLE_SPEED
 
 
 def respawn_ball(game_state):
@@ -135,11 +136,11 @@ def respawn_ball(game_state):
     ball = game_state['ball']
 
     ball.centerx = paddle.centerx
-    ball.bottom = paddle.top - 5
+    ball.bottom = paddle.top - BALL_OFFSET
     
     game_state['ball_dx'] = random.choice([-4, 4])
     game_state['ball_dy'] = -5
-    game_state['move_ball'] = False
+    game_state['launch_ball'] = False
 
 
 def generate_bricks(game_state):
@@ -170,7 +171,7 @@ def create_game_state():
         'ball': ball,
         'ball_dx': random.choice([-4, 4]),
         'ball_dy': -5,
-        'move_ball': False,
+        'launch_ball': False,
         'score': 0,
         'health': 3,
         'game_over': False
@@ -195,8 +196,8 @@ def main():
                 running = False
 
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE and not game_state['move_ball']:
-                    game_state['move_ball'] = True
+                if event.key == pygame.K_SPACE and not game_state['launch_ball']:
+                    game_state['launch_ball'] = True
 
                 if event.key == pygame.K_r and game_state['game_over']:
                     game_state = create_game_state()
