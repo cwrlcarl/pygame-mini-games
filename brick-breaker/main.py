@@ -77,9 +77,8 @@ def handle_ball_collisions(game_state):
             
             if game_state['ball_dy'] > 0:
                 ball.bottom = paddle.top
-
-            game_state['ball_dy'] *= -1
-            game_state['ball_dx'] += random.choice([-0.3, 0, 0.3])
+                game_state['ball_dy'] *= -1
+                game_state['ball_dx'] += random.choice([-0.3, 0, 0.3])
 
             if game_state['ball_dx'] > 5:
                 game_state['ball_dx'] = 5
