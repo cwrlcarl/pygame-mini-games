@@ -4,7 +4,7 @@ import os
 pygame.init()
 
 # window
-SCREEN_WIDTH, SCREEN_HEIGHT = 540, 540
+SCREEN_WIDTH, SCREEN_HEIGHT = 540, 515
 FPS = 60
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -51,5 +51,5 @@ PADDLE_WIDTH, PADDLE_HEIGHT = 90, 10
 PADDLE_SPEED = 7
 
 # ball
-BALL_SIZE = 25
+BALL_SIZE = 20
 BALL_OFFSET = 5
