@@ -1,37 +1,8 @@
 import pygame
-import os
-
-SCREEN_WIDTH, SCREEN_HEIGHT = 540, 540
-FPS = 60
-
-BASE_DIR = os.path.dirname(__file__)
-ASSETS_DIR = os.path.join(BASE_DIR, 'assets')
-IMG_DIR = os.path.join(ASSETS_DIR, 'img')
-SHIP_PATH = os.path.join(IMG_DIR, 'blue-ship.png')
-BULLET_PATH = os.path.join(IMG_DIR, 'green-laser.png')
-
-# player
-player_img = pygame.image.load(SHIP_PATH)
-PLAYER_IMG = pygame.transform.scale_by(player_img, 0.75)
-PLAYER_WIDTH = PLAYER_IMG.get_width()
-PLAYER_HEIGHT = PLAYER_IMG.get_height()
-PLAYER_SPEED = 5
-
-# bullet
-bullet_img = pygame.image.load(BULLET_PATH)
-BULLET_IMG = pygame.transform.scale_by(bullet_img, 1)
-BULLET_WIDTH = BULLET_IMG.get_width()
-BULLET_HEIGHT = BULLET_IMG.get_height()
-BULLET_SPEED = 7
-
-BG_COLOR = (37, 35, 41)
-WHITE = (242, 240, 245)
-
+from settings import *
 
 class Player:
     def __init__(self, x, y):
-        self.x = x
-        self.y = y
         self.img = PLAYER_IMG
         self.rect = self.img.get_rect()
         self.rect.center = (x, y)
@@ -51,13 +22,10 @@ class Player:
 
 class Bullet:
     def __init__(self, x, y):
-        self.x = x
-        self.y = y
         self.img = BULLET_IMG
         self.rect = self.img.get_rect()
-        self.rect.center = (x, y)
+        self.rect.midbottom = (x, y)
         self.speed = BULLET_SPEED
-        self.bullets = []
 
     def update(self):
         self.rect.y -= self.speed
@@ -68,6 +36,8 @@ class Bullet:
 
 def main():
     pygame.init()
+    pygame.mixer.music.play(-1)
+
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     pygame.display.set_caption("Space Invaders 🚀")
 
@@ -86,8 +56,10 @@ def main():
 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
-                    bullet = Bullet(x=player.rect.centerx, y=player.rect.y)
-                    bullets.append(bullet)
+                    if len(bullets) < MAX_BULLETS:
+                        LASER_SFX.play()
+                        bullet = Bullet(x=player.rect.centerx, y=player.rect.y)
+                        bullets.append(bullet)
 
         player.update()
         for bullet in bullets:
