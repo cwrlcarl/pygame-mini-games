@@ -1,9 +1,10 @@
 import pygame
+import random
 import os
 
 pygame.mixer.init()
 
-SCREEN_WIDTH, SCREEN_HEIGHT = 540, 540
+SCREEN_WIDTH, SCREEN_HEIGHT = 540, 640
 FPS = 60
 
 # COLORS
@@ -43,8 +44,15 @@ BULLET_WIDTH = BULLET_IMG.get_width()
 BULLET_HEIGHT = BULLET_IMG.get_height()
 
 # ENEMY
-ENEMY_IMG_PATH = os.path.join(IMG_DIR, 'black-enemy.png')
-_enemy_img = pygame.image.load(ENEMY_IMG_PATH)
-ENEMY_IMG = pygame.transform.scale_by(_enemy_img, 0.70)
-ENEMY_WIDTH = ENEMY_IMG.get_width()
-ENEMY_HEIGHT = ENEMY_IMG.get_height()
+ENEMY_ROWS, ENEMY_COLS  = 4, 6
+ENEMY_ROW_GAP, ENEMY_COL_GAP = 15, 30
+ENEMY_OFFSET = 80
+ENEMY_IMGS = [
+    pygame.transform.scale_by(
+        pygame.image.load(os.path.join(IMG_DIR, f'enemy{i}.png')),
+        0.50
+    )
+    for i in range(1, 5)
+]
+ENEMY_WIDTH = ENEMY_IMGS[0].get_width()
+ENEMY_HEIGHT = ENEMY_IMGS[0].get_height()
