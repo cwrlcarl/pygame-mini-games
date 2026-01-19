@@ -52,6 +52,8 @@ def main():
     pygame.mixer.music.play(-1)
 
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+    bg_image = pygame.image.load(BG_IMAGE_PATH).convert()
+    bg_width, bg_height = bg_image.get_size()
     pygame.display.set_caption("Space Invaders 🚀")
 
     player = Player(x=SCREEN_WIDTH//2, y=SCREEN_HEIGHT-PLAYER_HEIGHT)
@@ -102,7 +104,9 @@ def main():
                 enemy_direction *= -1
                 break
 
-        screen.fill(BG_COLOR)
+        for x in range(0, SCREEN_WIDTH, bg_width):
+            for y in range(0, SCREEN_HEIGHT, bg_height):
+                screen.blit(bg_image, (x, y))
 
         player.update()
         player.draw(screen)
