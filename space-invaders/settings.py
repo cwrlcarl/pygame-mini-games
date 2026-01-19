@@ -1,5 +1,4 @@
 import pygame
-import random
 import os
 
 pygame.mixer.init()
@@ -26,13 +25,15 @@ LASER_SFX_PATH = os.path.join(AUDIO_DIR, 'laser-sfx.ogg')
 LASER_SFX = pygame.mixer.Sound(LASER_SFX_PATH)
 LASER_SFX.set_volume(0.5)
 
+# BG IMAGE
+BG_IMAGE_PATH = os.path.join(IMG_DIR, 'black-bg.png')
+
 # PLAYER
 PLAYER_SPEED = 5
 PLAYER_IMG_PATH = os.path.join(IMG_DIR, 'blue-ship.png')
 _player_img = pygame.image.load(PLAYER_IMG_PATH)
 PLAYER_IMG = pygame.transform.scale_by(_player_img, 0.75)
-PLAYER_WIDTH = PLAYER_IMG.get_width()
-PLAYER_HEIGHT = PLAYER_IMG.get_height()
+PLAYER_WIDTH, PLAYER_HEIGHT = PLAYER_IMG.get_size()
 
 # BULLET
 BULLET_SPEED = 7
@@ -40,12 +41,12 @@ MAX_BULLETS = 3
 BULLET_IMG_PATH = os.path.join(IMG_DIR, 'green-laser.png')
 _bullet_img = pygame.image.load(BULLET_IMG_PATH)
 BULLET_IMG = pygame.transform.scale_by(_bullet_img, 0.85)
-BULLET_WIDTH = BULLET_IMG.get_width()
-BULLET_HEIGHT = BULLET_IMG.get_height()
+BULLET_WIDTH, BULLET_HEIGHT = BULLET_IMG.get_size()
 
 # ENEMY
+ENEMY_SPEED = 1
 ENEMY_ROWS, ENEMY_COLS  = 4, 6
-ENEMY_ROW_GAP, ENEMY_COL_GAP = 15, 30
+ENEMY_ROW_GAP, ENEMY_COL_GAP = 30, 20
 ENEMY_OFFSET = 80
 ENEMY_IMGS = [
     pygame.transform.scale_by(
@@ -54,5 +55,4 @@ ENEMY_IMGS = [
     )
     for i in range(1, 5)
 ]
-ENEMY_WIDTH = ENEMY_IMGS[0].get_width()
-ENEMY_HEIGHT = ENEMY_IMGS[0].get_height()
+ENEMY_WIDTH, ENEMY_HEIGHT = ENEMY_IMGS[0].get_size()
