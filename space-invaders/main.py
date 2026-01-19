@@ -40,8 +40,8 @@ class Enemy:
         self.rect = self.img.get_rect()
         self.rect.center = (x, y)
 
-    def update(self):
-        pass
+    def update(self, direction):
+        self.rect.x += ENEMY_SPEED * direction
 
     def draw(self, screen):
         screen.blit(self.img, self.rect)
@@ -57,14 +57,15 @@ def main():
     player = Player(x=SCREEN_WIDTH//2, y=SCREEN_HEIGHT-PLAYER_HEIGHT)
     bullets = []
     enemies = []
+    enemy_direction = 1
 
-    row_width = (ENEMY_WIDTH * ENEMY_COLS) + (ENEMY_ROW_GAP * (ENEMY_COLS - 1))
+    row_width = (ENEMY_WIDTH * ENEMY_COLS) + (ENEMY_COL_GAP * (ENEMY_COLS - 1))
     start_x = (SCREEN_WIDTH - row_width) // 2 + ENEMY_WIDTH // 2
 
     for row in range(ENEMY_ROWS):
         for col in range(ENEMY_COLS):
-            x = col * (ENEMY_WIDTH + ENEMY_ROW_GAP) + start_x
-            y = row * (ENEMY_HEIGHT + ENEMY_COL_GAP) + ENEMY_OFFSET
+            x = col * (ENEMY_WIDTH + ENEMY_COL_GAP) + start_x
+            y = row * (ENEMY_HEIGHT + ENEMY_ROW_GAP) + ENEMY_OFFSET
 
             enemy = Enemy(x=x, y=y)
             enemies.append(enemy)
@@ -75,7 +76,6 @@ def main():
     while running:
         clock.tick(FPS)
 
-        # events
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
@@ -97,6 +97,11 @@ def main():
             if bullet.rect.y < 0:
                 bullets.remove(bullet)
 
+        for enemy in enemies:
+            if enemy.rect.right >= SCREEN_WIDTH or enemy.rect.left <= 0:
+                enemy_direction *= -1
+                break
+
         screen.fill(BG_COLOR)
 
         player.update()
@@ -107,7 +112,7 @@ def main():
             bullet.draw(screen)
 
         for enemy in enemies:
-            enemy.update()
+            enemy.update(enemy_direction)
             enemy.draw(screen)
 
         pygame.display.update()
