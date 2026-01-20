@@ -2,6 +2,7 @@ import pygame
 import random
 from settings import *
 
+
 class Player:
     def __init__(self, x, y):
         self.img = PLAYER_IMG
@@ -60,6 +61,8 @@ def main():
     bullets = []
     enemies = []
     enemy_direction = 1
+    score = 0
+    health = 3
 
     row_width = (ENEMY_WIDTH * ENEMY_COLS) + (ENEMY_COL_GAP * (ENEMY_COLS - 1))
     start_x = (SCREEN_WIDTH - row_width) // 2 + ENEMY_WIDTH // 2
@@ -92,6 +95,7 @@ def main():
         for bullet in bullets[:]:
             for enemy in enemies[:]:
                 if bullet.rect.colliderect(enemy.rect):
+                    score += 50
                     bullets.remove(bullet)
                     enemies.remove(enemy)
 
@@ -107,6 +111,12 @@ def main():
         for x in range(0, SCREEN_WIDTH, bg_width):
             for y in range(0, SCREEN_HEIGHT, bg_height):
                 screen.blit(bg_image, (x, y))
+
+        score_text = main_window_text.render(f"Score: {score:05d}", True, WHITE)
+        screen.blit(score_text, (10, 10))
+
+        health_text = main_window_text.render(f"Health: {health}", True, WHITE)
+        screen.blit(health_text, (SCREEN_WIDTH - health_text.get_width() - 10, 10))
 
         player.update()
         player.draw(screen)
