@@ -69,7 +69,7 @@ def draw_game_ui(screen, game_state):
     screen.blit(health_text, (SCREEN_WIDTH - health_text.get_width() - 10, 10))
 
     if game_state['game_over']:
-        game_over_text = GAME_OVER_FONT.render("Game Over", True, WHITE)
+        game_over_text = GAME_OVER_FONT.render(":(", True, WHITE)
         screen.blit(game_over_text, ((SCREEN_WIDTH - game_over_text.get_width()) // 2,
                                      (SCREEN_HEIGHT - game_over_text.get_height()) // 2))
 
@@ -99,7 +99,6 @@ def create_game_state():
         for col in range(ENEMY_COLS):
             x = col * (ENEMY_WIDTH + ENEMY_COL_GAP) + start_x
             y = row * (ENEMY_HEIGHT + ENEMY_ROW_GAP) + ENEMY_OFFSET
-
             enemy = Enemy(x=x, y=y)
             game_state['enemies'].append(enemy)
 
@@ -113,7 +112,6 @@ def main():
     pygame.display.set_caption("Space Invaders 🚀")
 
     game_state = create_game_state()
-
     clock = pygame.time.Clock()
     running = True
 
@@ -125,11 +123,17 @@ def main():
                 running = False
 
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:
+                if event.key == pygame.K_SPACE and not game_state['game_over']:
                     if len(game_state['bullets']) < MAX_PLAYER_BULLETS:
                         LASER_SFX.play()
                         bullet = PlayerBullet(x=game_state['player'].rect.centerx, y=game_state['player'].rect.y)
                         game_state['bullets'].append(bullet)
+
+                if event.key == pygame.K_r and game_state['game_over']:
+                    game_state = create_game_state()
+
+                if event.key == pygame.K_ESCAPE and game_state['game_over']:
+                    running = False
 
         if not game_state['game_over']:
             # enemy collision
@@ -164,7 +168,7 @@ def main():
             and len(game_state['enemy_bullets']) < MAX_ENEMY_BULLETS \
             and len(game_state['enemies']) > 0:
                 enemy_shooting = random.choice(game_state['enemies'])
-                enemy_bullet = EnemyBullet(x=enemy_shooting.rect.centerx, y=enemy_shooting.rect.y)
+                enemy_bullet = EnemyBullet(x=enemy_shooting.rect.centerx, y=enemy_shooting.rect.bottom)
                 game_state['enemy_bullets'].append(enemy_bullet)
                 game_state['last_enemy_shot'] = time_now
 
