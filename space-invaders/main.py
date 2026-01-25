@@ -61,23 +61,36 @@ class EnemyBullet:
         screen.blit(self.image, self.rect)
 
 
-def main():
+def draw_game_ui(screen, game_state):
+    score_text = MAIN_FONT.render(f"Score: {game_state['score']:05d}", True, WHITE)
+    screen.blit(score_text, (10, 10))
+
+    health_text = MAIN_FONT.render(f"Health: {game_state['health']}", True, WHITE)
+    screen.blit(health_text, (SCREEN_WIDTH - health_text.get_width() - 10, 10))
+
+    if game_state['game_over']:
+        game_over_text = GAME_OVER_FONT.render("Game Over", True, WHITE)
+        screen.blit(game_over_text, ((SCREEN_WIDTH - game_over_text.get_width()) // 2,
+                                     (SCREEN_HEIGHT - game_over_text.get_height()) // 2))
+
+
+def create_game_state():
     pygame.init()
     pygame.mixer.music.play(-1)
 
-    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-    bg_image = pygame.image.load(BG_IMAGE_PATH).convert()
-    bg_width, bg_height = bg_image.get_size()
-    pygame.display.set_caption("Space Invaders 🚀")
+    player = Player(x=SCREEN_WIDTH // 2, y=SCREEN_HEIGHT - PLAYER_HEIGHT)
 
-    player = Player(x=SCREEN_WIDTH//2, y=SCREEN_HEIGHT-PLAYER_HEIGHT)
-    bullets = []
-    enemies = []
-    enemy_bullets = []
-    enemy_direction = 1
-    last_enemy_shot = pygame.time.get_ticks()
-    score = 0
-    health = 3
+    game_state = {
+        'player': player,
+        'bullets': [],
+        'enemies': [],
+        'enemy_bullets': [],
+        'enemy_direction': 1,
+        'last_enemy_shot': pygame.time.get_ticks(),
+        'score': 0,
+        'health': 3,
+        'game_over': False
+    }
 
     row_width = (ENEMY_WIDTH * ENEMY_COLS) + (ENEMY_COL_GAP * (ENEMY_COLS - 1))
     start_x = (SCREEN_WIDTH - row_width) // 2 + ENEMY_WIDTH // 2
@@ -88,7 +101,18 @@ def main():
             y = row * (ENEMY_HEIGHT + ENEMY_ROW_GAP) + ENEMY_OFFSET
 
             enemy = Enemy(x=x, y=y)
-            enemies.append(enemy)
+            game_state['enemies'].append(enemy)
+
+    return game_state
+
+
+def main():
+    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+    bg_image = pygame.image.load(BG_IMAGE_PATH).convert()
+    bg_width, bg_height = bg_image.get_size()
+    pygame.display.set_caption("Space Invaders 🚀")
+
+    game_state = create_game_state()
 
     clock = pygame.time.Clock()
     running = True
@@ -102,70 +126,84 @@ def main():
 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
-                    if len(bullets) < MAX_PLAYER_BULLETS:
+                    if len(game_state['bullets']) < MAX_PLAYER_BULLETS:
                         LASER_SFX.play()
-                        bullet = PlayerBullet(x=player.rect.centerx, y=player.rect.y)
-                        bullets.append(bullet)
+                        bullet = PlayerBullet(x=game_state['player'].rect.centerx, y=game_state['player'].rect.y)
+                        game_state['bullets'].append(bullet)
 
-        for bullet in bullets[:]:
-            for enemy in enemies[:]:
-                if bullet.rect.colliderect(enemy.rect):
-                    score += 50
-                    bullets.remove(bullet)
-                    enemies.remove(enemy)
+        if not game_state['game_over']:
+            # enemy collision
+            for bullet in game_state['bullets'][:]:
+                for enemy in game_state['enemies'][:]:
+                    if bullet.rect.colliderect(enemy.rect):
+                        game_state['score'] += 50
+                        game_state['bullets'].remove(bullet)
+                        game_state['enemies'].remove(enemy)
 
-        for enemy_bullet in enemy_bullets[:]:
-            if enemy_bullet.rect.colliderect(player.rect):
-                health -= 1
-                enemy_bullets.remove(enemy_bullet)
-                if health == 0:
-                    pass
+            # player collision
+            for enemy_bullet in game_state['enemy_bullets'][:]:
+                if enemy_bullet.rect.colliderect(game_state['player'].rect):
+                    game_state['health'] -= 1
+                    game_state['enemy_bullets'].remove(enemy_bullet)
+                    if game_state['health'] == 0:
+                        GAME_OVER_SFX.play()
+                        pygame.mixer.music.stop()
+                        game_state['game_over'] = True
 
-        for bullet in bullets[:]:
-            if bullet.rect.y < 0:
-                bullets.remove(bullet)
+            # off-screen bullets
+            for bullet in game_state['bullets'][:]:
+                if bullet.rect.y < 0:
+                    game_state['bullets'].remove(bullet)
+            for enemy_bullet in game_state['enemy_bullets'][:]:
+                if enemy_bullet.rect.y > SCREEN_HEIGHT:
+                    game_state['enemy_bullets'].remove(enemy_bullet)
 
-        for enemy_bullet in enemy_bullets[:]:
-            if enemy_bullet.rect.y > SCREEN_HEIGHT:
-                enemy_bullets.remove(enemy_bullet)
+            # enemy shooting
+            time_now = pygame.time.get_ticks()
+            if time_now - game_state['last_enemy_shot'] > ENEMY_BULLET_COOLDOWN \
+            and len(game_state['enemy_bullets']) < MAX_ENEMY_BULLETS \
+            and len(game_state['enemies']) > 0:
+                enemy_shooting = random.choice(game_state['enemies'])
+                enemy_bullet = EnemyBullet(x=enemy_shooting.rect.centerx, y=enemy_shooting.rect.y)
+                game_state['enemy_bullets'].append(enemy_bullet)
+                game_state['last_enemy_shot'] = time_now
 
-        for enemy in enemies:
-            if enemy.rect.right >= SCREEN_WIDTH or enemy.rect.left <= 0:
-                enemy_direction *= -1
-                break
+            # enemy direction
+            for enemy in game_state['enemies']:
+                if enemy.rect.right >= SCREEN_WIDTH or enemy.rect.left <= 0:
+                    game_state['enemy_direction'] *= -1
+                    break
 
-        time_now = pygame.time.get_ticks()
-        if time_now - last_enemy_shot > ENEMY_BULLET_COOLDOWN and len(enemy_bullets) < MAX_ENEMY_BULLETS and len(enemies) > 0:
-            enemy_shooting = random.choice(enemies)
-            enemy_bullet = EnemyBullet(x=enemy_shooting.rect.centerx, y=enemy_shooting.rect.y)
-            enemy_bullets.append(enemy_bullet)
-            last_enemy_shot = time_now
+            # update
+            if not game_state['game_over']:
+                game_state['player'].update()
 
+                for bullet in game_state['bullets']:
+                    bullet.update()
+
+                for enemy in game_state['enemies']:
+                    enemy.update(game_state['enemy_direction'])
+
+                for enemy_bullet in game_state['enemy_bullets']:
+                    enemy_bullet.update()
+
+        # draw
         for x in range(0, SCREEN_WIDTH, bg_width):
             for y in range(0, SCREEN_HEIGHT, bg_height):
                 screen.blit(bg_image, (x, y))
 
-        score_text = MAIN_FONT.render(f"Score: {score:05d}", True, WHITE)
-        screen.blit(score_text, (10, 10))
+        game_state['player'].draw(screen)
 
-        health_text = MAIN_FONT.render(f"Health: {health}", True, WHITE)
-        screen.blit(health_text, (SCREEN_WIDTH - health_text.get_width() - 10, 10))
-
-        player.update()
-        player.draw(screen)
-
-        for bullet in bullets:
-            bullet.update()
+        for bullet in game_state['bullets']:
             bullet.draw(screen)
 
-        for enemy in enemies:
-            enemy.update(enemy_direction)
+        for enemy in game_state['enemies']:
             enemy.draw(screen)
 
-        for enemy_bullet in enemy_bullets:
-            enemy_bullet.update()
+        for enemy_bullet in game_state['enemy_bullets']:
             enemy_bullet.draw(screen)
 
+        draw_game_ui(screen, game_state)
         pygame.display.update()
 
     pygame.quit()
