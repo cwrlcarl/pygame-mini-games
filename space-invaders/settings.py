@@ -30,6 +30,9 @@ LASER_SFX_PATH = os.path.join(AUDIO_DIR, 'laser-sfx.ogg')
 LASER_SFX = pygame.mixer.Sound(LASER_SFX_PATH)
 LASER_SFX.set_volume(0.5)
 
+GAME_OVER_SFX_PATH = os.path.join(AUDIO_DIR, 'game-over-sfx.ogg')
+GAME_OVER_SFX = pygame.mixer.Sound(GAME_OVER_SFX_PATH)
+
 # BG IMAGE
 BG_IMAGE_PATH = os.path.join(IMG_DIR, 'black-bg.png')
 
