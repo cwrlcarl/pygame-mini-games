@@ -1,5 +1,3 @@
-from encodings.cp862 import encoding_map
-
 import pygame
 import random
 from settings import *
@@ -77,7 +75,6 @@ def main():
     enemies = []
     enemy_bullets = []
     enemy_direction = 1
-    enemy_cooldown = 1000
     last_enemy_shot = pygame.time.get_ticks()
     score = 0
     health = 3
@@ -105,7 +102,7 @@ def main():
 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
-                    if len(bullets) < MAX_BULLETS:
+                    if len(bullets) < MAX_PLAYER_BULLETS:
                         LASER_SFX.play()
                         bullet = PlayerBullet(x=player.rect.centerx, y=player.rect.y)
                         bullets.append(bullet)
@@ -116,6 +113,13 @@ def main():
                     score += 50
                     bullets.remove(bullet)
                     enemies.remove(enemy)
+
+        for enemy_bullet in enemy_bullets[:]:
+            if enemy_bullet.rect.colliderect(player.rect):
+                health -= 1
+                enemy_bullets.remove(enemy_bullet)
+                if health == 0:
+                    pass
 
         for bullet in bullets[:]:
             if bullet.rect.y < 0:
@@ -131,7 +135,7 @@ def main():
                 break
 
         time_now = pygame.time.get_ticks()
-        if time_now - last_enemy_shot > enemy_cooldown and len(enemy_bullets) < 5 and len(enemies) > 0:
+        if time_now - last_enemy_shot > ENEMY_BULLET_COOLDOWN and len(enemy_bullets) < MAX_ENEMY_BULLETS and len(enemies) > 0:
             enemy_shooting = random.choice(enemies)
             enemy_bullet = EnemyBullet(x=enemy_shooting.rect.centerx, y=enemy_shooting.rect.y)
             enemy_bullets.append(enemy_bullet)
@@ -141,10 +145,10 @@ def main():
             for y in range(0, SCREEN_HEIGHT, bg_height):
                 screen.blit(bg_image, (x, y))
 
-        score_text = main_window_text.render(f"Score: {score:05d}", True, WHITE)
+        score_text = MAIN_FONT.render(f"Score: {score:05d}", True, WHITE)
         screen.blit(score_text, (10, 10))
 
-        health_text = main_window_text.render(f"Health: {health}", True, WHITE)
+        health_text = MAIN_FONT.render(f"Health: {health}", True, WHITE)
         screen.blit(health_text, (SCREEN_WIDTH - health_text.get_width() - 10, 10))
 
         player.update()
