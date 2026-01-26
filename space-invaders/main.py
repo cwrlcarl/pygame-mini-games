@@ -63,10 +63,10 @@ class EnemyBullet:
 
 def draw_game_ui(screen, game_state):
     score_text = MAIN_FONT.render(f"Score: {game_state['score']:05d}", True, WHITE)
-    screen.blit(score_text, (10, 10))
+    screen.blit(score_text, (50, 20))
 
     health_text = MAIN_FONT.render(f"Health: {game_state['health']}", True, WHITE)
-    screen.blit(health_text, (SCREEN_WIDTH - health_text.get_width() - 10, 10))
+    screen.blit(health_text, (SCREEN_WIDTH - health_text.get_width() - 50, 20))
 
     if game_state['game_over']:
         game_over_text = GAME_OVER_FONT.render(":(", True, WHITE)
@@ -85,8 +85,9 @@ def create_game_state():
         'bullets': [],
         'enemies': [],
         'enemy_bullets': [],
-        'enemy_direction': 1,
         'last_enemy_shot': pygame.time.get_ticks(),
+        'enemy_direction': 1,
+        'enemy_hit_wall': False,
         'score': 0,
         'health': 3,
         'game_over': False
@@ -136,7 +137,7 @@ def main():
                     running = False
 
         if not game_state['game_over']:
-            # enemy collision
+            # player bullet and enemy collision
             for bullet in game_state['bullets'][:]:
                 for enemy in game_state['enemies'][:]:
                     if bullet.rect.colliderect(enemy.rect):
@@ -144,7 +145,7 @@ def main():
                         game_state['bullets'].remove(bullet)
                         game_state['enemies'].remove(enemy)
 
-            # player collision
+            # enemy bullet and player collision
             for enemy_bullet in game_state['enemy_bullets'][:]:
                 if enemy_bullet.rect.colliderect(game_state['player'].rect):
                     game_state['health'] -= 1
@@ -153,6 +154,13 @@ def main():
                         GAME_OVER_SFX.play()
                         pygame.mixer.music.stop()
                         game_state['game_over'] = True
+
+            # enemy and player collision
+            for enemy in game_state['enemies']:
+                if game_state['player'].rect.colliderect(enemy.rect):
+                    GAME_OVER_SFX.play()
+                    pygame.mixer.music.stop()
+                    game_state['game_over'] = True
 
             # off-screen bullets
             for bullet in game_state['bullets'][:]:
@@ -175,8 +183,13 @@ def main():
             # enemy direction
             for enemy in game_state['enemies']:
                 if enemy.rect.right >= SCREEN_WIDTH or enemy.rect.left <= 0:
-                    game_state['enemy_direction'] *= -1
-                    break
+                    game_state['enemy_hit_wall'] = True
+
+            if game_state['enemy_hit_wall']:
+                game_state['enemy_direction'] *= -1
+                for enemy in game_state['enemies']:
+                    enemy.rect.y += ENEMY_DY
+                    game_state['enemy_hit_wall'] = False
 
             # update
             if not game_state['game_over']:
