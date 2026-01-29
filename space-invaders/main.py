@@ -1,64 +1,7 @@
 import pygame
 import random
 from settings import *
-
-
-class Player:
-    def __init__(self, x, y):
-        self.image = PLAYER_IMG
-        self.rect = self.image.get_rect()
-        self.rect.center = (x, y)
-        self.speed = PLAYER_SPEED
-
-    def update(self):
-        keys = pygame.key.get_pressed()
-
-        if (keys[pygame.K_a] or keys[pygame.K_LEFT]) and self.rect.left > 0:
-            self.rect.x -= self.speed
-        if (keys[pygame.K_d] or keys[pygame.K_RIGHT]) and self.rect.right < SCREEN_WIDTH:
-            self.rect.x += self.speed
-    def draw(self, screen):
-        screen.blit(self.image, self.rect)
-
-
-class PlayerBullet:
-    def __init__(self, x, y):
-        self.image = BULLET_IMG
-        self.rect = self.image.get_rect()
-        self.rect.midbottom = (x, y)
-        self.speed = BULLET_SPEED
-
-    def update(self):
-        self.rect.y -= self.speed
-
-    def draw(self, screen):
-        screen.blit(self.image, self.rect)
-
-
-class Enemy:
-    def __init__(self, x, y):
-        self.image = random.choice(ENEMY_IMGS)
-        self.rect = self.image.get_rect()
-        self.rect.center = (x, y)
-
-    def update(self, direction):
-        self.rect.x += ENEMY_SPEED * direction
-
-    def draw(self, screen):
-        screen.blit(self.image, self.rect)
-
-
-class EnemyBullet:
-    def __init__(self, x, y):
-        self.image = ENEMY_BULLET_IMG
-        self.rect = self.image.get_rect()
-        self.rect.center = (x, y)
-
-    def update(self):
-        self.rect.y += ENEMY_BULLET_SPEED
-
-    def draw(self, screen):
-        screen.blit(self.image, self.rect)
+from classes import *
 
 
 def draw_game_ui(screen, game_state):
@@ -82,7 +25,7 @@ def create_game_state():
 
     game_state = {
         'player': player,
-        'bullets': [],
+        'player_bullets': [],
         'enemies': [],
         'enemy_bullets': [],
         'last_enemy_shot': pygame.time.get_ticks(),
@@ -125,10 +68,10 @@ def main():
 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE and not game_state['game_over']:
-                    if len(game_state['bullets']) < MAX_PLAYER_BULLETS:
+                    if len(game_state['player_bullets']) < MAX_PLAYER_BULLETS:
                         LASER_SFX.play()
-                        bullet = PlayerBullet(x=game_state['player'].rect.centerx, y=game_state['player'].rect.y)
-                        game_state['bullets'].append(bullet)
+                        player_bullet = PlayerBullet(x=game_state['player'].rect.centerx, y=game_state['player'].rect.y)
+                        game_state['player_bullets'].append(player_bullet)
 
                 if event.key == pygame.K_r and game_state['game_over']:
                     game_state = create_game_state()
@@ -138,16 +81,18 @@ def main():
 
         if not game_state['game_over']:
             # player bullet and enemy collision
-            for bullet in game_state['bullets'][:]:
+            for player_bullet in game_state['player_bullets'][:]:
                 for enemy in game_state['enemies'][:]:
-                    if bullet.rect.colliderect(enemy.rect):
+                    if player_bullet.rect.colliderect(enemy.rect):
+                        ZAP_SFX.play()
                         game_state['score'] += 50
-                        game_state['bullets'].remove(bullet)
+                        game_state['player_bullets'].remove(player_bullet)
                         game_state['enemies'].remove(enemy)
 
             # enemy bullet and player collision
             for enemy_bullet in game_state['enemy_bullets'][:]:
                 if enemy_bullet.rect.colliderect(game_state['player'].rect):
+                    HIT_SFX.play()
                     game_state['health'] -= 1
                     game_state['enemy_bullets'].remove(enemy_bullet)
                     if game_state['health'] == 0:
@@ -163,9 +108,9 @@ def main():
                     game_state['game_over'] = True
 
             # off-screen bullets
-            for bullet in game_state['bullets'][:]:
-                if bullet.rect.y < 0:
-                    game_state['bullets'].remove(bullet)
+            for player_bullet in game_state['player_bullets'][:]:
+                if player_bullet.rect.y < 0:
+                    game_state['player_bullets'].remove(player_bullet)
             for enemy_bullet in game_state['enemy_bullets'][:]:
                 if enemy_bullet.rect.y > SCREEN_HEIGHT:
                     game_state['enemy_bullets'].remove(enemy_bullet)
@@ -195,8 +140,8 @@ def main():
             if not game_state['game_over']:
                 game_state['player'].update()
 
-                for bullet in game_state['bullets']:
-                    bullet.update()
+                for player_bullet in game_state['player_bullets']:
+                    player_bullet.update()
 
                 for enemy in game_state['enemies']:
                     enemy.update(game_state['enemy_direction'])
@@ -211,8 +156,8 @@ def main():
 
         game_state['player'].draw(screen)
 
-        for bullet in game_state['bullets']:
-            bullet.draw(screen)
+        for player_bullet in game_state['player_bullets']:
+            player_bullet.draw(screen)
 
         for enemy in game_state['enemies']:
             enemy.draw(screen)
