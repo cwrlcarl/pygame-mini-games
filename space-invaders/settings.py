@@ -30,6 +30,12 @@ LASER_SFX_PATH = os.path.join(AUDIO_DIR, 'laser-sfx.ogg')
 LASER_SFX = pygame.mixer.Sound(LASER_SFX_PATH)
 LASER_SFX.set_volume(0.5)
 
+ZAP_SFX_PATH = os.path.join(AUDIO_DIR, 'zap-sfx.wav')
+ZAP_SFX = pygame.mixer.Sound(ZAP_SFX_PATH)
+
+HIT_SFX_PATH = os.path.join(AUDIO_DIR, 'hit-sfx.wav')
+HIT_SFX = pygame.mixer.Sound(HIT_SFX_PATH)
+
 GAME_OVER_SFX_PATH = os.path.join(AUDIO_DIR, 'game-over-sfx.ogg')
 GAME_OVER_SFX = pygame.mixer.Sound(GAME_OVER_SFX_PATH)
 
