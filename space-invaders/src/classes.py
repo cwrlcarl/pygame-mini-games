@@ -2,7 +2,6 @@ import pygame
 import random
 from settings import *
 
-
 class Player:
     def __init__(self, x, y):
         self.image = PLAYER_IMG
