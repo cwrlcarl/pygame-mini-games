@@ -1,7 +1,23 @@
 import pygame
-import random
 from settings import *
 from classes import *
+from mechanics import *
+
+def draw_game_screen(screen, game_state, bg_image, bg_width, bg_height):
+    for x in range(0, SCREEN_WIDTH, bg_width):
+        for y in range(0, SCREEN_HEIGHT, bg_height):
+            screen.blit(bg_image, (x, y))
+
+    game_state['player'].draw(screen)
+
+    for player_bullet in game_state['player_bullets']:
+        player_bullet.draw(screen)
+
+    for enemy in game_state['enemies']:
+        enemy.draw(screen)
+
+    for enemy_bullet in game_state['enemy_bullets']:
+        enemy_bullet.draw(screen)
 
 
 def draw_game_ui(screen, game_state):
@@ -15,38 +31,6 @@ def draw_game_ui(screen, game_state):
         game_over_text = GAME_OVER_FONT.render(":(", True, WHITE)
         screen.blit(game_over_text, ((SCREEN_WIDTH - game_over_text.get_width()) // 2,
                                      (SCREEN_HEIGHT - game_over_text.get_height()) // 2))
-
-
-def create_game_state():
-    pygame.init()
-    pygame.mixer.music.play(-1)
-
-    player = Player(x=SCREEN_WIDTH // 2, y=SCREEN_HEIGHT - PLAYER_HEIGHT)
-
-    game_state = {
-        'player': player,
-        'player_bullets': [],
-        'enemies': [],
-        'enemy_bullets': [],
-        'last_enemy_shot': pygame.time.get_ticks(),
-        'enemy_direction': 1,
-        'enemy_hit_wall': False,
-        'score': 0,
-        'health': 3,
-        'game_over': False
-    }
-
-    row_width = (ENEMY_WIDTH * ENEMY_COLS) + (ENEMY_COL_GAP * (ENEMY_COLS - 1))
-    start_x = (SCREEN_WIDTH - row_width) // 2 + ENEMY_WIDTH // 2
-
-    for row in range(ENEMY_ROWS):
-        for col in range(ENEMY_COLS):
-            x = col * (ENEMY_WIDTH + ENEMY_COL_GAP) + start_x
-            y = row * (ENEMY_HEIGHT + ENEMY_ROW_GAP) + ENEMY_OFFSET
-            enemy = Enemy(x=x, y=y)
-            game_state['enemies'].append(enemy)
-
-    return game_state
 
 
 def main():
@@ -80,91 +64,19 @@ def main():
                     running = False
 
         if not game_state['game_over']:
-            # player bullet and enemy collision
-            for player_bullet in game_state['player_bullets'][:]:
-                for enemy in game_state['enemies'][:]:
-                    if player_bullet.rect.colliderect(enemy.rect):
-                        ZAP_SFX.play()
-                        game_state['score'] += 50
-                        game_state['player_bullets'].remove(player_bullet)
-                        game_state['enemies'].remove(enemy)
+            bullets_hit_enemies(game_state)
+            enemy_bullets_hit_player(game_state)
+            enemies_hit_player(game_state)
 
-            # enemy bullet and player collision
-            for enemy_bullet in game_state['enemy_bullets'][:]:
-                if enemy_bullet.rect.colliderect(game_state['player'].rect):
-                    HIT_SFX.play()
-                    game_state['health'] -= 1
-                    game_state['enemy_bullets'].remove(enemy_bullet)
-                    if game_state['health'] == 0:
-                        GAME_OVER_SFX.play()
-                        pygame.mixer.music.stop()
-                        game_state['game_over'] = True
+            game_state = handle_enemy_bullets(game_state)
+            handle_off_screen_bullets(game_state)
 
-            # enemy and player collision
-            for enemy in game_state['enemies']:
-                if game_state['player'].rect.colliderect(enemy.rect):
-                    GAME_OVER_SFX.play()
-                    pygame.mixer.music.stop()
-                    game_state['game_over'] = True
+            handle_enemy_movement(game_state)
 
-            # off-screen bullets
-            for player_bullet in game_state['player_bullets'][:]:
-                if player_bullet.rect.y < 0:
-                    game_state['player_bullets'].remove(player_bullet)
-            for enemy_bullet in game_state['enemy_bullets'][:]:
-                if enemy_bullet.rect.y > SCREEN_HEIGHT:
-                    game_state['enemy_bullets'].remove(enemy_bullet)
-
-            # enemy shooting
-            time_now = pygame.time.get_ticks()
-            if time_now - game_state['last_enemy_shot'] > ENEMY_BULLET_COOLDOWN \
-            and len(game_state['enemy_bullets']) < MAX_ENEMY_BULLETS \
-            and len(game_state['enemies']) > 0:
-                enemy_shooting = random.choice(game_state['enemies'])
-                enemy_bullet = EnemyBullet(x=enemy_shooting.rect.centerx, y=enemy_shooting.rect.bottom)
-                game_state['enemy_bullets'].append(enemy_bullet)
-                game_state['last_enemy_shot'] = time_now
-
-            # enemy direction
-            for enemy in game_state['enemies']:
-                if enemy.rect.right >= SCREEN_WIDTH or enemy.rect.left <= 0:
-                    game_state['enemy_hit_wall'] = True
-
-            if game_state['enemy_hit_wall']:
-                game_state['enemy_direction'] *= -1
-                for enemy in game_state['enemies']:
-                    enemy.rect.y += ENEMY_DY
-                    game_state['enemy_hit_wall'] = False
-
-            # update
             if not game_state['game_over']:
-                game_state['player'].update()
+                update_entities(game_state)
 
-                for player_bullet in game_state['player_bullets']:
-                    player_bullet.update()
-
-                for enemy in game_state['enemies']:
-                    enemy.update(game_state['enemy_direction'])
-
-                for enemy_bullet in game_state['enemy_bullets']:
-                    enemy_bullet.update()
-
-        # draw
-        for x in range(0, SCREEN_WIDTH, bg_width):
-            for y in range(0, SCREEN_HEIGHT, bg_height):
-                screen.blit(bg_image, (x, y))
-
-        game_state['player'].draw(screen)
-
-        for player_bullet in game_state['player_bullets']:
-            player_bullet.draw(screen)
-
-        for enemy in game_state['enemies']:
-            enemy.draw(screen)
-
-        for enemy_bullet in game_state['enemy_bullets']:
-            enemy_bullet.draw(screen)
-
+        draw_game_screen(screen, game_state, bg_image, bg_width, bg_height)
         draw_game_ui(screen, game_state)
         pygame.display.update()
 
