@@ -6,7 +6,6 @@ from classes import *
 def create_game_state():
     pygame.init()
     pygame.mixer.music.play(-1)
-
     player = Player(x=SCREEN_WIDTH // 2, y=SCREEN_HEIGHT - PLAYER_HEIGHT)
 
     game_state = {
@@ -14,6 +13,7 @@ def create_game_state():
         'player_bullets': [],
         'enemies': [],
         'enemy_bullets': [],
+        'meteors': [],
         'last_enemy_shot': pygame.time.get_ticks(),
         'enemy_direction': 1,
         'enemy_hit_wall': False,
@@ -24,7 +24,6 @@ def create_game_state():
 
     row_width = (ENEMY_WIDTH * ENEMY_COLS) + (ENEMY_COL_GAP * (ENEMY_COLS - 1))
     start_x = (SCREEN_WIDTH - row_width) // 2 + ENEMY_WIDTH // 2
-
     for row in range(ENEMY_ROWS):
         for col in range(ENEMY_COLS):
             x = col * (ENEMY_WIDTH + ENEMY_COL_GAP) + start_x
@@ -62,6 +61,7 @@ def enemies_hit_player(game_state):
         if game_state['player'].rect.colliderect(enemy.rect):
             GAME_OVER_SFX.play()
             pygame.mixer.music.stop()
+            game_state['health'] = 0
             game_state['game_over'] = True
 
 
@@ -74,7 +74,6 @@ def handle_enemy_bullets(game_state):
         enemy_bullet = EnemyBullet(x=enemy_shooting.rect.centerx, y=enemy_shooting.rect.bottom)
         game_state['enemy_bullets'].append(enemy_bullet)
         game_state['last_enemy_shot'] = time_now
-
     return game_state
 
 
@@ -99,14 +98,25 @@ def handle_enemy_movement(game_state):
             game_state['enemy_hit_wall'] = False
 
 
+def handle_meteor_spawn(game_state):
+    if len(game_state['meteors']) < MAX_METEORS:
+        x = random.randint(0, SCREEN_WIDTH)
+        y = random.randint(0, SCREEN_HEIGHT)
+        meteor = Meteor(x=x, y=y)
+        game_state['meteors'].append(meteor)
+
+    for meteor in game_state['meteors'][:]:
+        if meteor.rect.y > SCREEN_HEIGHT:
+            game_state['meteors'].remove(meteor)
+
+
 def update_entities(game_state):
     game_state['player'].update()
-
     for player_bullet in game_state['player_bullets']:
         player_bullet.update()
-
     for enemy in game_state['enemies']:
         enemy.update(game_state['enemy_direction'])
-
     for enemy_bullet in game_state['enemy_bullets']:
         enemy_bullet.update()
+    for meteor in game_state['meteors']:
+        meteor.update()
