@@ -16,6 +16,7 @@ class Player:
             self.rect.x -= self.speed
         if (keys[pygame.K_d] or keys[pygame.K_RIGHT]) and self.rect.right < SCREEN_WIDTH:
             self.rect.x += self.speed
+
     def draw(self, screen):
         screen.blit(self.image, self.rect)
 
@@ -52,9 +53,24 @@ class EnemyBullet:
         self.image = ENEMY_BULLET_IMG
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
+        self.dx = random.uniform(-0.8, 0.8)
 
     def update(self):
         self.rect.y += ENEMY_BULLET_SPEED
+        self.rect.x += self.dx
+
+    def draw(self, screen):
+        screen.blit(self.image, self.rect)
+
+
+class Meteor:
+    def __init__(self, x, y):
+        self.image = random.choice(METEOR_IMGS)
+        self.rect = self.image.get_rect()
+        self.rect.center = (x, y)
+
+    def update(self):
+        pass
 
     def draw(self, screen):
         screen.blit(self.image, self.rect)
