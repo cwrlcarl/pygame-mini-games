@@ -8,6 +8,9 @@ def draw_game_screen(screen, game_state, bg_image, bg_width, bg_height):
         for y in range(0, SCREEN_HEIGHT, bg_height):
             screen.blit(bg_image, (x, y))
 
+    for meteor in game_state['meteors']:
+        meteor.draw(screen)
+
     game_state['player'].draw(screen)
 
     for player_bullet in game_state['player_bullets']:
@@ -21,16 +24,31 @@ def draw_game_screen(screen, game_state, bg_image, bg_width, bg_height):
 
 
 def draw_game_ui(screen, game_state):
-    score_text = MAIN_FONT.render(f"Score: {game_state['score']:05d}", True, WHITE)
-    screen.blit(score_text, (50, 20))
+    screen.blit(HEALTH_ICON, HEALTH_ICON_RECT)
+    screen.blit(NUMERAL_X, NUMERAL_X_RECT)
+    if game_state['health'] == 3:
+        draw_health(screen, NUMERAL_IMGS[3])
+    elif game_state['health'] == 2:
+        draw_health(screen, NUMERAL_IMGS[2])
+    elif game_state['health'] == 1:
+        draw_health(screen, NUMERAL_IMGS[1])
+    elif game_state['health'] == 0:
+        draw_health(screen, NUMERAL_IMGS[0])
 
-    health_text = MAIN_FONT.render(f"Health: {game_state['health']}", True, WHITE)
-    screen.blit(health_text, (SCREEN_WIDTH - health_text.get_width() - 50, 20))
+    score_text = MAIN_FONT.render(f"{game_state['score']:05d}", True, WHITE)
+    screen.blit(score_text, ((SCREEN_WIDTH - score_text.get_width()) // 2, 20))
+
+    high_score_text = MAIN_FONT.render("HIGH: 0", True, WHITE)
+    screen.blit(high_score_text, ((SCREEN_WIDTH - high_score_text.get_width()) - 30, 20))
 
     if game_state['game_over']:
         game_over_text = GAME_OVER_FONT.render(":(", True, WHITE)
         screen.blit(game_over_text, ((SCREEN_WIDTH - game_over_text.get_width()) // 2,
                                      (SCREEN_HEIGHT - game_over_text.get_height()) // 2))
+
+
+def draw_health(screen, numeral_image):
+    screen.blit(numeral_image, NUMERAL_IMGS_RECT)
 
 
 def main():
@@ -72,6 +90,7 @@ def main():
             handle_off_screen_bullets(game_state)
 
             handle_enemy_movement(game_state)
+            handle_meteor_spawn(game_state)
 
             if not game_state['game_over']:
                 update_entities(game_state)
