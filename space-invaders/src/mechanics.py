@@ -15,13 +15,20 @@ def create_game_state():
         'enemy_bullets': [],
         'meteors': [],
         'last_enemy_shot': pygame.time.get_ticks(),
+        'enemy_speed': 1,
         'enemy_direction': 1,
         'enemy_hit_wall': False,
         'score': 0,
         'health': 3,
+        'wave': 1,
         'game_over': False
     }
 
+    spawn_enemies(game_state)
+    return game_state
+
+
+def spawn_enemies(game_state):
     row_width = (ENEMY_WIDTH * ENEMY_COLS) + (ENEMY_COL_GAP * (ENEMY_COLS - 1))
     start_x = (SCREEN_WIDTH - row_width) // 2 + ENEMY_WIDTH // 2
     for row in range(ENEMY_ROWS):
@@ -31,7 +38,17 @@ def create_game_state():
             enemy = Enemy(x=x, y=y)
             game_state['enemies'].append(enemy)
 
-    return game_state
+
+def show_new_wave(game_state):
+    if len(game_state['enemies']) == 0:
+        print(f"Wave {game_state['wave']} complete!")
+        game_state['wave'] += 1
+        print(f"New Wave: {game_state['wave']}\n")
+
+        game_state['enemy_direction'] = 1
+        game_state['enemy_hit_wall'] = False
+
+        spawn_enemies(game_state)
 
 
 def bullets_hit_enemies(game_state):
@@ -111,11 +128,13 @@ def handle_meteor_spawn(game_state):
 
 
 def update_entities(game_state):
+    current_enemy_speed = game_state['enemy_speed'] + (game_state['wave'] * 0.2)
+
     game_state['player'].update()
     for player_bullet in game_state['player_bullets']:
         player_bullet.update()
     for enemy in game_state['enemies']:
-        enemy.update(game_state['enemy_direction'])
+        enemy.update(game_state['enemy_direction'], current_enemy_speed)
     for enemy_bullet in game_state['enemy_bullets']:
         enemy_bullet.update()
     for meteor in game_state['meteors']:

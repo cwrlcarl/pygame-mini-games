@@ -46,6 +46,9 @@ def draw_game_ui(screen, game_state):
         screen.blit(game_over_text, ((SCREEN_WIDTH - game_over_text.get_width()) // 2,
                                      (SCREEN_HEIGHT - game_over_text.get_height()) // 2))
 
+        screen.blit(GAME_OVER_UI, ((SCREEN_WIDTH - GAME_OVER_UI.get_width()) // 2,
+                              (SCREEN_HEIGHT - GAME_OVER_UI.get_height()) // 2))
+
 
 def draw_health(screen, numeral_image):
     screen.blit(numeral_image, NUMERAL_IMGS_RECT)
@@ -67,6 +70,7 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+                print("Thanks for playing!")
 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE and not game_state['game_over']:
@@ -80,8 +84,11 @@ def main():
 
                 if event.key == pygame.K_ESCAPE and game_state['game_over']:
                     running = False
+                    print("Thanks for playing!")
 
         if not game_state['game_over']:
+            show_new_wave(game_state)
+
             bullets_hit_enemies(game_state)
             enemy_bullets_hit_player(game_state)
             enemies_hit_player(game_state)

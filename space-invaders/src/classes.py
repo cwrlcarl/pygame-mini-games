@@ -41,8 +41,8 @@ class Enemy:
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
 
-    def update(self, direction):
-        self.rect.x += ENEMY_SPEED * direction
+    def update(self, direction, speed):
+        self.rect.x += speed * direction
 
     def draw(self, screen):
         screen.blit(self.image, self.rect)

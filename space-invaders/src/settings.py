@@ -63,14 +63,13 @@ PLAYER_WIDTH, PLAYER_HEIGHT = PLAYER_IMG.get_size()
 
 # PLAYER BULLET
 BULLET_SPEED = 7
-MAX_PLAYER_BULLETS = 1
+MAX_PLAYER_BULLETS = 100
 BULLET_IMG_PATH = os.path.join(IMG_DIR, 'green-laser.png')
 _bullet_img = pygame.image.load(BULLET_IMG_PATH)
 BULLET_IMG = pygame.transform.scale_by(_bullet_img, 0.85)
 BULLET_WIDTH, BULLET_HEIGHT = BULLET_IMG.get_size()
 
 # ENEMY
-ENEMY_SPEED = 1
 ENEMY_DY = 20
 ENEMY_ROWS, ENEMY_COLS  = 4, 7
 ENEMY_ROW_GAP, ENEMY_COL_GAP = 30, 20
@@ -105,3 +104,7 @@ METEOR_WIDTH, METEOR_HEIGHT = METEOR_IMGS[0].get_size()
 
 # BG IMAGE
 BG_IMAGE_PATH = os.path.join(IMG_DIR, 'black-bg.png')
+
+GAME_OVER_UI_PATH = os.path.join(IMG_DIR, 'game-over-ui.jpg')
+_game_over_ui = pygame.image.load(GAME_OVER_UI_PATH)
+GAME_OVER_UI = pygame.transform.scale_by(_game_over_ui, 0.30)
