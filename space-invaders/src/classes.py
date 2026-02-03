@@ -40,9 +40,11 @@ class Enemy:
         self.image = random.choice(ENEMY_IMGS)
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
+        self.x_pos = float(x)
 
     def update(self, direction, speed):
-        self.rect.x += speed * direction
+        self.x_pos += speed * direction
+        self.rect.x = int(self.x_pos)
 
     def draw(self, screen):
         screen.blit(self.image, self.rect)
