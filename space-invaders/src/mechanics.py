@@ -3,7 +3,7 @@ import random
 from settings import *
 from classes import *
 
-def create_game_state():
+def create_game_state(high_score=0):
     pygame.init()
     pygame.mixer.music.play(-1)
     player = Player(x=SCREEN_WIDTH // 2, y=SCREEN_HEIGHT - PLAYER_HEIGHT)
@@ -19,6 +19,7 @@ def create_game_state():
         'enemy_direction': 1,
         'enemy_hit_wall': False,
         'score': 0,
+        'high_score': high_score,
         'health': 3,
         'wave': 1,
         'game_over': False
@@ -128,7 +129,7 @@ def handle_meteor_spawn(game_state):
 
 
 def update_entities(game_state):
-    current_enemy_speed = game_state['enemy_speed'] + (game_state['wave'] * 0.2)
+    current_enemy_speed = game_state['enemy_speed'] * (1 + game_state['wave'] * 0.15)
 
     game_state['player'].update()
     for player_bullet in game_state['player_bullets']:
@@ -139,3 +140,8 @@ def update_entities(game_state):
         enemy_bullet.update()
     for meteor in game_state['meteors']:
         meteor.update()
+
+
+def show_high_score(game_state):
+    if game_state['score'] > game_state['high_score']:
+        game_state['high_score'] = game_state['score']

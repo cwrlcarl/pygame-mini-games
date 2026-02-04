@@ -63,7 +63,7 @@ PLAYER_WIDTH, PLAYER_HEIGHT = PLAYER_IMG.get_size()
 
 # PLAYER BULLET
 BULLET_SPEED = 7
-MAX_PLAYER_BULLETS = 100
+MAX_PLAYER_BULLETS = 1
 BULLET_IMG_PATH = os.path.join(IMG_DIR, 'green-laser.png')
 _bullet_img = pygame.image.load(BULLET_IMG_PATH)
 BULLET_IMG = pygame.transform.scale_by(_bullet_img, 0.85)

@@ -37,8 +37,7 @@ def draw_game_ui(screen, game_state):
 
     score_text = MAIN_FONT.render(f"{game_state['score']:05d}", True, WHITE)
     screen.blit(score_text, ((SCREEN_WIDTH - score_text.get_width()) // 2, 20))
-
-    high_score_text = MAIN_FONT.render("HIGH: 0", True, WHITE)
+    high_score_text = MAIN_FONT.render(f"HIGH: {game_state['high_score']}", True, WHITE)
     screen.blit(high_score_text, ((SCREEN_WIDTH - high_score_text.get_width()) - 30, 20))
 
     if game_state['game_over']:
@@ -80,7 +79,7 @@ def main():
                         game_state['player_bullets'].append(player_bullet)
 
                 if event.key == pygame.K_r and game_state['game_over']:
-                    game_state = create_game_state()
+                    game_state = create_game_state(game_state['high_score'])
 
                 if event.key == pygame.K_ESCAPE and game_state['game_over']:
                     running = False
@@ -101,6 +100,8 @@ def main():
 
             if not game_state['game_over']:
                 update_entities(game_state)
+        else:
+            show_high_score(game_state)
 
         draw_game_screen(screen, game_state, bg_image, bg_width, bg_height)
         draw_game_ui(screen, game_state)
