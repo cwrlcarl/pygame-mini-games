@@ -26,6 +26,7 @@ def create_game_state(high_score=0):
     }
 
     spawn_enemies(game_state)
+    spawn_initial_meteors(game_state)
     return game_state
 
 
@@ -48,7 +49,6 @@ def show_new_wave(game_state):
 
         game_state['enemy_direction'] = 1
         game_state['enemy_hit_wall'] = False
-
         spawn_enemies(game_state)
 
 
@@ -116,10 +116,18 @@ def handle_enemy_movement(game_state):
             game_state['enemy_hit_wall'] = False
 
 
+def spawn_initial_meteors(game_state):
+    for _ in range(MAX_METEORS):
+        x = random.randint(0, SCREEN_WIDTH)
+        y = random.randint(0, SCREEN_HEIGHT)
+        meteor = Meteor(x=x, y=y)
+        game_state['meteors'].append(meteor)
+
+
 def handle_meteor_spawn(game_state):
     if len(game_state['meteors']) < MAX_METEORS:
         x = random.randint(0, SCREEN_WIDTH)
-        y = random.randint(0, SCREEN_HEIGHT)
+        y = random.randint(-100, 0 - METEOR_HEIGHT)
         meteor = Meteor(x=x, y=y)
         game_state['meteors'].append(meteor)
 

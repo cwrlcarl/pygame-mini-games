@@ -41,10 +41,6 @@ def draw_game_ui(screen, game_state):
     screen.blit(high_score_text, ((SCREEN_WIDTH - high_score_text.get_width()) - 30, 20))
 
     if game_state['game_over']:
-        game_over_text = GAME_OVER_FONT.render(":(", True, WHITE)
-        screen.blit(game_over_text, ((SCREEN_WIDTH - game_over_text.get_width()) // 2,
-                                     (SCREEN_HEIGHT - game_over_text.get_height()) // 2))
-
         screen.blit(GAME_OVER_UI, ((SCREEN_WIDTH - GAME_OVER_UI.get_width()) // 2,
                               (SCREEN_HEIGHT - GAME_OVER_UI.get_height()) // 2))
 

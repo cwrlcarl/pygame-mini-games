@@ -70,9 +70,12 @@ class Meteor:
         self.image = random.choice(METEOR_IMGS)
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
+        self.y_pos = float(y)
+        self.speed = 0.3
 
     def update(self):
-        pass
+        self.y_pos += self.speed
+        self.rect.y = int(self.y_pos)
 
     def draw(self, screen):
         screen.blit(self.image, self.rect)
