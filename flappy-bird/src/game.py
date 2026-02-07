@@ -19,6 +19,8 @@ class Game:
         self.last_pipe_x = SCREEN_WIDTH
         self.spawn_pipe()
         self.base = Base()
+        self.ground_level = self.base.y
+        self.game_over = False
 
     def spawn_pipe(self):
         pipe = Pipe(SCREEN_WIDTH)
@@ -26,20 +28,28 @@ class Game:
         self.last_pipe_x += SCREEN_WIDTH + self.pipe_gap
 
     def check_collisions(self):
-        pass
+        for pipe in self.pipes:
+            if pipe.rect.colliderect(self.bird.rect):
+                self.game_over = True
+
+        if self.bird.rect.bottom >= self.ground_level:
+            self.bird.rect.bottom = self.ground_level
+            self.game_over = True
 
     def update(self):
-        self.bird.update()
+        if not self.game_over:
+            self.bird.update()
+            self.base.update()
 
-        for pipe in self.pipes:
-            pipe.update()
-        if len(self.pipes) == 0 or self.pipes[-1].x < SCREEN_WIDTH - self.pipe_gap:
-            self.spawn_pipe()
-        for pipe in self.pipes[:]:
-            if pipe.rect.right < 0:
-                self.pipes.remove(pipe)
+            for pipe in self.pipes:
+                pipe.update()
+            if len(self.pipes) == 0 or self.pipes[-1].x < SCREEN_WIDTH - self.pipe_gap:
+                self.spawn_pipe()
+            for pipe in self.pipes[:]:
+                if pipe.rect.right < 0:
+                    self.pipes.remove(pipe)
 
-        self.base.update()
+            self.check_collisions()
 
     def draw(self):
         self.screen.blit(load_assets()['sprites']['background'].convert(), (0, 0))
@@ -60,7 +70,7 @@ class Game:
                     self.running = False
 
                 if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_SPACE:
+                    if event.key == pygame.K_SPACE and self.bird.bottom:
                         self.jump_bird()
 
                 if event.type == pygame.MOUSEBUTTONDOWN:
@@ -71,6 +81,7 @@ class Game:
             self.draw()
 
     def jump_bird(self):
-        self.assets['audio']['wing'].play()
-        self.bird.is_jumping = True
-        self.bird.velocity = self.bird.jump_strength
+        if not self.game_over:
+            self.assets['audio']['wing'].play()
+            self.bird.is_jumping = True
+            self.bird.velocity = self.bird.jump_strength
