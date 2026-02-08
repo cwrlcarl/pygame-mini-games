@@ -1,7 +1,7 @@
 import pygame
 import os
 
-SCREEN_WIDTH, SCREEN_HEIGHT = 540, 640
+SCREEN_WIDTH, SCREEN_HEIGHT = 550, 650
 FPS = 60
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -10,6 +10,11 @@ AUDIO_DIR = os.path.join(ASSETS_DIR, 'audio')
 SPRITES_DIR = os.path.join(ASSETS_DIR, 'sprites')
 
 def load_assets():
+    bottom_pipe = pygame.transform.scale_by(
+        pygame.image.load(os.path.join(
+            SPRITES_DIR, 'pipe-green.png')),1.5)
+    top_pipe = pygame.transform.flip(bottom_pipe, False, True)
+
     return {
         'audio': {
             'die': pygame.mixer.Sound(os.path.join(AUDIO_DIR, 'die.wav')),
@@ -23,10 +28,15 @@ def load_assets():
                 pygame.image.load(os.path.join(SPRITES_DIR, 'yellowbird-downflap.png')),
                 1.5
             ),
-            'pipe': pygame.image.load(os.path.join(SPRITES_DIR, 'pipe-green.png')),
-            'base': pygame.image.load(os.path.join(SPRITES_DIR, 'base.png')),
+            'bottom_pipe': bottom_pipe,
+            'top_pipe': top_pipe,
+            'base': pygame.transform.scale_by(
+                pygame.image.load(os.path.join(SPRITES_DIR, 'base.png')),
+                1.3
+            ),
             'background': pygame.transform.scale(
                 pygame.image.load(os.path.join(SPRITES_DIR, 'background-day.png')),
-                (SCREEN_WIDTH, SCREEN_HEIGHT))
+                (SCREEN_WIDTH, SCREEN_HEIGHT)
+            )
         }
     }

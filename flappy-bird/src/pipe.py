@@ -2,19 +2,26 @@ import random
 from settings import load_assets
 
 class Pipe:
-    def __init__(self, x):
+    def __init__(self, x, y):
         self.x = x
-        self.gap_y = random.randint(300, 550)
-        self.image = load_assets()['sprites']['pipe']
-        self.rect = self.image.get_rect()
-        self.rect.x = self.x
-        self.rect.y = self.gap_y
+        self.y = y
+        self.pipe_gap = 75
         self.color = (59, 212, 102)
         self.speed = 3
 
+        self.top_pipe = load_assets()['sprites']['top_pipe']
+        self.top_rect = self.top_pipe.get_rect()
+        self.top_rect.bottomleft = (x, self.y - self.pipe_gap)
+
+        self.bottom_pipe = load_assets()['sprites']['bottom_pipe']
+        self.bottom_rect = self.bottom_pipe.get_rect()
+        self.bottom_rect.topleft = (x, self.y + self.pipe_gap)
+
     def update(self):
         self.x -= self.speed
-        self.rect.x = self.x
+        self.top_rect.x = self.x
+        self.bottom_rect.x = self.x
 
     def draw(self, screen):
-        screen.blit(self.image, self.rect)
+        screen.blit(self.top_pipe, self.top_rect)
+        screen.blit(self.bottom_pipe, self.bottom_rect)

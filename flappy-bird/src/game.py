@@ -1,4 +1,5 @@
 import pygame
+import random
 from base import Base
 from bird import Bird
 from pipe import Pipe
@@ -23,13 +24,13 @@ class Game:
         self.game_over = False
 
     def spawn_pipe(self):
-        pipe = Pipe(SCREEN_WIDTH)
+        pipe = Pipe(SCREEN_WIDTH, random.randint(250, 400))
         self.pipes.append(pipe)
         self.last_pipe_x += SCREEN_WIDTH + self.pipe_gap
 
     def check_collisions(self):
         for pipe in self.pipes:
-            if pipe.rect.colliderect(self.bird.rect):
+            if pipe.bottom_rect.colliderect(self.bird.rect):
                 self.game_over = True
 
         if self.bird.rect.bottom >= self.ground_level:
@@ -46,7 +47,7 @@ class Game:
             if len(self.pipes) == 0 or self.pipes[-1].x < SCREEN_WIDTH - self.pipe_gap:
                 self.spawn_pipe()
             for pipe in self.pipes[:]:
-                if pipe.rect.right < 0:
+                if pipe.bottom_rect.right < 0:
                     self.pipes.remove(pipe)
 
             self.check_collisions()
