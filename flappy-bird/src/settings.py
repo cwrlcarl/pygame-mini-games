@@ -37,6 +37,7 @@ def load_assets():
             'background': pygame.transform.scale(
                 pygame.image.load(os.path.join(SPRITES_DIR, 'background-day.png')),
                 (SCREEN_WIDTH, SCREEN_HEIGHT)
-            )
+            ),
+            'message': pygame.image.load(os.path.join(SPRITES_DIR, 'message.png'))
         }
     }
