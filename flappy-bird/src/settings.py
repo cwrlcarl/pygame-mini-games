@@ -1,6 +1,8 @@
 import pygame
 import os
 
+pygame.font.init()
+
 SCREEN_WIDTH, SCREEN_HEIGHT = 550, 650
 FPS = 60
 
@@ -9,10 +11,12 @@ ASSETS_DIR = os.path.join(BASE_DIR, 'assets')
 AUDIO_DIR = os.path.join(ASSETS_DIR, 'audio')
 SPRITES_DIR = os.path.join(ASSETS_DIR, 'sprites')
 
+score_font = pygame.font.SysFont("KenVector Future Regular", 35)
+
 def load_assets():
     bottom_pipe = pygame.transform.scale_by(
         pygame.image.load(os.path.join(
-            SPRITES_DIR, 'pipe-green.png')),1.5)
+            SPRITES_DIR, 'pipe-green.png')),1.6)
     top_pipe = pygame.transform.flip(bottom_pipe, False, True)
 
     return {
