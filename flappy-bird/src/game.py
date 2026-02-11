@@ -13,7 +13,11 @@ class Game:
         pygame.display.set_caption("Flappy Bird 🐤")
         self.clock = pygame.time.Clock()
         self.running = True
+        self.start = None
+        self.game_over = None
+        self._initialize_game_state()
 
+    def _initialize_game_state(self):
         self.bird = Bird()
         self.pipes = []
         self.pipe_gap_x = 200
@@ -24,6 +28,9 @@ class Game:
         self.start = False
         self.score = 0
         self.game_over = False
+
+    def reset(self):
+        self._initialize_game_state()
 
     def spawn_pipe(self):
         pipe = Pipe(SCREEN_WIDTH + 50, random.randint(250, 400))
@@ -66,13 +73,19 @@ class Game:
 
     def draw_ui(self):
         if not self.start:
-            message_width, message_height = load_assets()['sprites']['message'].get_size()
-            x = (SCREEN_WIDTH - message_width) / 2
-            y = SCREEN_HEIGHT / 2 - message_height + 50
+            width, height = load_assets()['sprites']['message'].get_size()
+            x = (SCREEN_WIDTH - width) / 2
+            y = SCREEN_HEIGHT / 2 - height + 50
             self.screen.blit(load_assets()['sprites']['message'],(x, y))
 
         score_text = score_font.render(f"{self.score}", True, (255, 255, 255))
         self.screen.blit(score_text, ((SCREEN_WIDTH - score_text.get_width()) / 2, 20))
+
+        if self.game_over:
+            width, height = load_assets()['sprites']['game_over'].get_size()
+            x = (SCREEN_WIDTH - width) / 2
+            y = (SCREEN_HEIGHT - height) / 2
+            self.screen.blit(load_assets()['sprites']['game_over'], (x, y))
 
     def draw_sprites(self):
         self.screen.blit(load_assets()['sprites']['background'].convert(), (0, 0))
@@ -93,6 +106,9 @@ class Game:
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_SPACE and self.bird.bottom:
                         self.jump_bird()
+
+                    if event.key == pygame.K_r and self.game_over:
+                        self.reset()
 
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:

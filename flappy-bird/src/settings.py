@@ -42,6 +42,7 @@ def load_assets():
                 pygame.image.load(os.path.join(SPRITES_DIR, 'background-day.png')),
                 (SCREEN_WIDTH, SCREEN_HEIGHT)
             ),
-            'message': pygame.image.load(os.path.join(SPRITES_DIR, 'message.png'))
+            'message': pygame.image.load(os.path.join(SPRITES_DIR, 'message.png')),
+            'game_over': pygame.image.load(os.path.join(SPRITES_DIR, 'gameover.png'))
         }
     }
