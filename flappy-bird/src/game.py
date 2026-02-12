@@ -78,8 +78,15 @@ class Game:
             y = SCREEN_HEIGHT / 2 - height + 50
             self.screen.blit(load_assets()['sprites']['message'],(x, y))
 
-        score_text = score_font.render(f"{self.score}", True, (255, 255, 255))
-        self.screen.blit(score_text, ((SCREEN_WIDTH - score_text.get_width()) / 2, 20))
+        score = str(self.score)
+        numbers = load_assets()['sprites']['numbers']
+        digit_width = numbers[0].get_width()
+        total_width = len(score) * digit_width
+        starting_x, y = (SCREEN_WIDTH - total_width) / 2, 30
+        for i, digit in enumerate(score):
+            number = numbers[int(digit)]
+            x = starting_x + (i * digit_width)
+            self.screen.blit(number, (x, y))
 
         if self.game_over:
             width, height = load_assets()['sprites']['game_over'].get_size()
@@ -103,16 +110,17 @@ class Game:
                 if event.type == pygame.QUIT:
                     self.running = False
 
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_SPACE and self.bird.bottom:
-                        self.jump_bird()
-
-                    if event.key == pygame.K_r and self.game_over:
-                        self.reset()
-
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
                         self.jump_bird()
+
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_SPACE:
+                        self.jump_bird()
+                    if event.key == pygame.K_r and self.game_over:
+                        self.reset()
+                    if event.key == pygame.K_ESCAPE and self.game_over:
+                        self.running = False
 
             self.update()
             self.draw_sprites()
