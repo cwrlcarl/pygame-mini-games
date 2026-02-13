@@ -16,7 +16,7 @@ score_font = pygame.font.SysFont("KenVector Future Regular", 35)
 def load_assets():
     bottom_pipe = pygame.transform.scale_by(
         pygame.image.load(os.path.join(
-            SPRITES_DIR, 'pipe-green.png')),1.6)
+            SPRITES_DIR, 'pipe-green.png')),1.8)
     top_pipe = pygame.transform.flip(bottom_pipe, False, True)
 
     return {
@@ -28,10 +28,9 @@ def load_assets():
             'wing': pygame.mixer.Sound(os.path.join(AUDIO_DIR, 'wing.wav'))
         },
         'sprites': {
-            'bird': pygame.transform.scale_by(
-                pygame.image.load(os.path.join(SPRITES_DIR, 'yellowbird-downflap.png')),
-                1.5
-            ),
+            'bird': [pygame.transform.scale_by(
+                pygame.image.load(os.path.join(SPRITES_DIR, f'yellowbird-{wing_frame}flap.png')),
+                1.5) for wing_frame in ['up', 'mid', 'down']],
             'bottom_pipe': bottom_pipe,
             'top_pipe': top_pipe,
             'base': pygame.transform.scale_by(
