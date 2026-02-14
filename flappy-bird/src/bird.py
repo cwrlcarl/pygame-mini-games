@@ -9,13 +9,13 @@ class Bird:
         self.wing_count = 0
         self.image = self.sprites[self.wing_count]
         self.rect = self.image.get_rect()
-        self.rect.center = (SCREEN_WIDTH // 4, SCREEN_HEIGHT // 2)
+        self.rect.center = (SCREEN_WIDTH // 3, SCREEN_HEIGHT // 2)
         self.y = float(self.rect.centery)
 
         self.color = (255, 255, 0)
         self.velocity = 0
         self.gravity = 0.4
-        self.jump_strength = -7.5
+        self.jump_strength = -8
         self.max_fall_speed = 10
         self.is_jumping = False
 

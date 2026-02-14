@@ -6,6 +6,7 @@ class Base:
         tile = load_assets()['sprites']['base']
         tile_width = tile.get_width()
         self.image = pygame.Surface((SCREEN_WIDTH * 2, tile_width))
+        self.rect = self.image.get_rect()
 
         for x in range(0, SCREEN_WIDTH * 2, tile_width):
             self.image.blit(tile, (x, 0))
@@ -13,6 +14,7 @@ class Base:
         self.x1 = 0
         self.x2 = SCREEN_WIDTH
         self.y = SCREEN_HEIGHT - 100
+        self.rect.topleft = (0, self.y)
         self.speed = 3
 
     def update(self):

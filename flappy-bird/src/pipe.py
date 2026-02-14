@@ -4,7 +4,7 @@ class Pipe:
     def __init__(self, x, y):
         self.x = x
         self.y = y
-        self.pipe_gap_y = 75
+        self.pipe_gap_y = 78
         self.color = (59, 212, 102)
         self.speed = 3
         self.scored = False

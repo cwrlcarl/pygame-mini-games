@@ -16,7 +16,7 @@ score_font = pygame.font.SysFont("KenVector Future Regular", 35)
 def load_assets():
     bottom_pipe = pygame.transform.scale_by(
         pygame.image.load(os.path.join(
-            SPRITES_DIR, 'pipe-green.png')),1.8)
+            SPRITES_DIR, 'pipe-green.png')),1.7)
     top_pipe = pygame.transform.flip(bottom_pipe, False, True)
 
     return {
@@ -42,7 +42,13 @@ def load_assets():
                 (SCREEN_WIDTH, SCREEN_HEIGHT)
             ),
             'numbers': [pygame.image.load(os.path.join(SPRITES_DIR, f'{i}.png')) for i in range(0, 10)],
-            'message': pygame.image.load(os.path.join(SPRITES_DIR, 'message.png')),
-            'game_over': pygame.image.load(os.path.join(SPRITES_DIR, 'gameover.png'))
+            'message': pygame.transform.scale_by(
+                pygame.image.load(os.path.join(SPRITES_DIR, 'message.png')),
+                1.1
+            ),
+            'game_over': pygame.transform.scale_by(
+                pygame.image.load(os.path.join(SPRITES_DIR, 'gameover.png')),
+                1.2
+            )
         }
     }
