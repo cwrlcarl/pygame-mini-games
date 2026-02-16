@@ -126,11 +126,11 @@ class Game:
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
-                    self.jump_bird()
+                    self.jump()
 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
-                    self.jump_bird()
+                    self.jump()
                 if event.key == pygame.K_r and self.game_over:
                     self.reset()
                 if event.key == pygame.K_ESCAPE and self.game_over:
@@ -145,7 +145,7 @@ class Game:
             self.draw_ui()
             pygame.display.update()
 
-    def jump_bird(self):
+    def jump(self):
         if not self.game_over:
             self.assets['audio']['wing'].play()
             self.game_started = True
