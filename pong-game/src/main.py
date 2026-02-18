@@ -1,6 +1,7 @@
 import pygame
+import random
 
-SCREEN_WIDTH, SCREEN_HEIGHT = 900, 600
+SCREEN_WIDTH, SCREEN_HEIGHT = 800, 600
 FPS = 60
 
 class Game:
@@ -24,6 +25,16 @@ class Game:
     def update(self):
         self.paddle1.update_paddle1()
         self.paddle2.update_paddle2()
+        self.ball.update()
+
+    def handle_collisions(self):
+        if (self.ball.rect.colliderect(self.paddle1.rect) or
+                self.ball.rect.colliderect(self.paddle2.rect)):
+            self.ball.dx *= -1
+
+        if (self.ball.rect.top == 0 or
+                self.ball.rect.bottom == SCREEN_HEIGHT):
+            self.ball.dy *= -1
 
     def events(self):
         for event in pygame.event.get():
@@ -35,6 +46,7 @@ class Game:
             self.clock.tick(FPS)
             self.draw()
             self.update()
+            self.handle_collisions()
             self.events()
 
 
@@ -67,10 +79,12 @@ class Ball:
     def __init__(self, x, y):
         self.radius = 10
         self.rect = pygame.Rect(x, y, self.radius, self.radius)
-        self.speed = 7
+        self.dx = random.choice([-5, 5])
+        self.dy = random.choice([-1, 1])
 
     def update(self):
-        pass
+        self.rect.x += self.dx
+        self.rect.y += self.dy
 
     def draw(self, screen):
         pygame.draw.circle(screen, (0, 255, 0), self.rect.center, self.radius)
