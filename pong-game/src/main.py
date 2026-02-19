@@ -11,9 +11,10 @@ class Game:
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
         self.clock = pygame.time.Clock()
         self.running = True
+        self.start_time = None
         self.paddle1 = Paddle(50, SCREEN_HEIGHT // 2, (0, 0, 255))
         self.paddle2 = Paddle(SCREEN_WIDTH - 50, SCREEN_HEIGHT // 2, (255, 0, 0))
-        self.ball = Ball(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
+        self._spawn_ball()
 
     def draw(self):
         self.screen.fill((0, 0, 0))
@@ -36,6 +37,20 @@ class Game:
                 self.ball.rect.bottom == SCREEN_HEIGHT):
             self.ball.dy *= -1
 
+    def _spawn_ball(self):
+        self.ball = Ball(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
+
+    def respawn_ball(self):
+        if (self.ball.rect.right < 0 or
+                self.ball.rect.left > SCREEN_WIDTH):
+            if self.start_time is None:
+                self.start_time = pygame.time.get_ticks()
+            current_time = pygame.time.get_ticks()
+            elapsed_time = current_time - self.start_time
+            if elapsed_time > 1000:
+                self._spawn_ball()
+                self.start_time = None
+
     def events(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -47,6 +62,7 @@ class Game:
             self.draw()
             self.update()
             self.handle_collisions()
+            self.respawn_ball()
             self.events()
 
 
