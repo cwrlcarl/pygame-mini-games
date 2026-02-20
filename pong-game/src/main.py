@@ -1,8 +1,10 @@
 import pygame
 import random
+pygame.font.init()
 
 SCREEN_WIDTH, SCREEN_HEIGHT = 800, 600
 FPS = 60
+SCORE_FONT = pygame.font.SysFont('Monocraft', 50)
 
 class Game:
     def __init__(self):
@@ -15,13 +17,22 @@ class Game:
         self.paddle1 = Paddle(50, SCREEN_HEIGHT // 2, (0, 0, 255))
         self.paddle2 = Paddle(SCREEN_WIDTH - 50, SCREEN_HEIGHT // 2, (255, 0, 0))
         self._spawn_ball()
+        self.player_score = 0
+        self.enemy_score = 0
 
     def draw(self):
         self.screen.fill((0, 0, 0))
+        self.display_score_text()
         self.paddle1.draw(self.screen)
         self.paddle2.draw(self.screen)
         self.ball.draw(self.screen)
         pygame.display.flip()
+
+    def display_score_text(self):
+        player_score = SCORE_FONT.render(f'{self.player_score}', True, (255, 255, 255))
+        self.screen.blit(player_score, (150, 50))
+        enemy_score = SCORE_FONT.render(f'{self.enemy_score}', True, (255, 255, 255))
+        self.screen.blit(enemy_score, (SCREEN_WIDTH - enemy_score.get_width() - 150, 50))
 
     def update(self):
         self.paddle1.update_paddle1()
@@ -33,23 +44,34 @@ class Game:
                 self.ball.rect.colliderect(self.paddle2.rect)):
             self.ball.dx *= -1
 
-        if (self.ball.rect.top == 0 or
-                self.ball.rect.bottom == SCREEN_HEIGHT):
+        if (self.ball.rect.top < 0 or
+                self.ball.rect.bottom > SCREEN_HEIGHT):
             self.ball.dy *= -1
 
     def _spawn_ball(self):
         self.ball = Ball(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
 
+    def handle_score(self):
+        if self.ball.rect.right < 0:
+            if not self.ball.scored:
+                self.ball.scored = True
+                self.enemy_score += 1
+            self.respawn_ball()
+
+        if self.ball.rect.left > SCREEN_WIDTH:
+            if not self.ball.scored:
+                self.ball.scored = True
+                self.player_score += 1
+            self.respawn_ball()
+
     def respawn_ball(self):
-        if (self.ball.rect.right < 0 or
-                self.ball.rect.left > SCREEN_WIDTH):
-            if self.start_time is None:
-                self.start_time = pygame.time.get_ticks()
-            current_time = pygame.time.get_ticks()
-            elapsed_time = current_time - self.start_time
-            if elapsed_time > 1000:
-                self._spawn_ball()
-                self.start_time = None
+        if self.start_time is None:
+            self.start_time = pygame.time.get_ticks()
+        current_time = pygame.time.get_ticks()
+        elapsed_time = current_time - self.start_time
+        if elapsed_time > 1000:
+            self._spawn_ball()
+            self.start_time = None
 
     def events(self):
         for event in pygame.event.get():
@@ -62,7 +84,7 @@ class Game:
             self.draw()
             self.update()
             self.handle_collisions()
-            self.respawn_ball()
+            self.handle_score()
             self.events()
 
 
@@ -95,8 +117,9 @@ class Ball:
     def __init__(self, x, y):
         self.radius = 10
         self.rect = pygame.Rect(x, y, self.radius, self.radius)
-        self.dx = random.choice([-5, 5])
-        self.dy = random.choice([-1, 1])
+        self.dx = random.choice([-6, 6])
+        self.dy = random.choice([-3, 3])
+        self.scored = False
 
     def update(self):
         self.rect.x += self.dx
