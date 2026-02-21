@@ -14,42 +14,46 @@ class Game:
         self.clock = pygame.time.Clock()
         self.running = True
         self.start_time = None
+        self.starting_y = 55
         self.paddle1 = Paddle(50, SCREEN_HEIGHT // 2, (0, 0, 255))
         self.paddle2 = Paddle(SCREEN_WIDTH - 50, SCREEN_HEIGHT // 2, (255, 0, 0))
         self._spawn_ball()
         self.player_score = 0
         self.enemy_score = 0
 
+    def draw_line(self):
+        width, height, gap_size, x = 5, 15, 15, SCREEN_WIDTH // 2
+        for dash in range(17):
+            y = self.starting_y + dash * (height + gap_size)
+            pygame.draw.rect(self.screen, (64, 64, 64),
+                             pygame.Rect(x, y, width, height))
+
+    def display_score_text(self):
+        player_score = SCORE_FONT.render(f'{self.player_score}', True, (255, 255, 255))
+        self.screen.blit(player_score, ((SCREEN_WIDTH - player_score.get_width()) // 4, self.starting_y))
+        enemy_score = SCORE_FONT.render(f'{self.enemy_score}', True, (255, 255, 255))
+        self.screen.blit(enemy_score, ((SCREEN_WIDTH - enemy_score.get_width()) // 4 * 3, self.starting_y))
+
     def draw(self):
         self.screen.fill((0, 0, 0))
+        self.draw_line()
         self.display_score_text()
         self.paddle1.draw(self.screen)
         self.paddle2.draw(self.screen)
         self.ball.draw(self.screen)
         pygame.display.flip()
 
-    def display_score_text(self):
-        player_score = SCORE_FONT.render(f'{self.player_score}', True, (255, 255, 255))
-        self.screen.blit(player_score, (150, 50))
-        enemy_score = SCORE_FONT.render(f'{self.enemy_score}', True, (255, 255, 255))
-        self.screen.blit(enemy_score, (SCREEN_WIDTH - enemy_score.get_width() - 150, 50))
-
-    def update(self):
-        self.paddle1.update_paddle1()
-        self.paddle2.update_paddle2()
-        self.ball.update()
-
-    def handle_collisions(self):
-        if (self.ball.rect.colliderect(self.paddle1.rect) or
-                self.ball.rect.colliderect(self.paddle2.rect)):
-            self.ball.dx *= -1
-
-        if (self.ball.rect.top < 0 or
-                self.ball.rect.bottom > SCREEN_HEIGHT):
-            self.ball.dy *= -1
-
     def _spawn_ball(self):
         self.ball = Ball(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
+
+    def respawn_ball(self):
+        if self.start_time is None:
+            self.start_time = pygame.time.get_ticks()
+        current_time = pygame.time.get_ticks()
+        elapsed_time = current_time - self.start_time
+        if elapsed_time > 1000:
+            self._spawn_ball()
+            self.start_time = None
 
     def handle_score(self):
         if self.ball.rect.right < 0:
@@ -64,14 +68,19 @@ class Game:
                 self.player_score += 1
             self.respawn_ball()
 
-    def respawn_ball(self):
-        if self.start_time is None:
-            self.start_time = pygame.time.get_ticks()
-        current_time = pygame.time.get_ticks()
-        elapsed_time = current_time - self.start_time
-        if elapsed_time > 1000:
-            self._spawn_ball()
-            self.start_time = None
+    def handle_collisions(self):
+        if (self.ball.rect.colliderect(self.paddle1.rect) or
+                self.ball.rect.colliderect(self.paddle2.rect)):
+            self.ball.dx *= -1
+
+        if (self.ball.rect.top < 0 or
+                self.ball.rect.bottom > SCREEN_HEIGHT):
+            self.ball.dy *= -1
+
+    def update(self):
+        self.paddle1.update_paddle1()
+        self.paddle2.update_paddle2()
+        self.ball.update()
 
     def events(self):
         for event in pygame.event.get():
@@ -82,9 +91,9 @@ class Game:
         while self.running:
             self.clock.tick(FPS)
             self.draw()
-            self.update()
-            self.handle_collisions()
             self.handle_score()
+            self.handle_collisions()
+            self.update()
             self.events()
 
 
