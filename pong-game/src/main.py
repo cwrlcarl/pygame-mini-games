@@ -14,12 +14,17 @@ class Game:
         self.clock = pygame.time.Clock()
         self.running = True
         self.start_time = None
+        self.game_over = None
+        self._initialize_game_state()
+
+    def _initialize_game_state(self):
         self.starting_y = 55
         self.paddle1 = Paddle(50, SCREEN_HEIGHT // 2, (0, 0, 255))
         self.paddle2 = Paddle(SCREEN_WIDTH - 50, SCREEN_HEIGHT // 2, (255, 0, 0))
         self._spawn_ball()
         self.player_score = 0
         self.enemy_score = 0
+        self.game_over = False
 
     def draw_line(self):
         width, height, gap_size, x = 5, 15, 15, SCREEN_WIDTH // 2
@@ -34,10 +39,20 @@ class Game:
         enemy_score = SCORE_FONT.render(f'{self.enemy_score}', True, (255, 255, 255))
         self.screen.blit(enemy_score, ((SCREEN_WIDTH - enemy_score.get_width()) // 4 * 3, self.starting_y))
 
+    def display_winner_text(self):
+        if self.game_over:
+            result1 = "Win!" if self.player_score == 3 else "Lose!"
+            result2 = "Win!" if self.enemy_score == 3 else "Lose!"
+            player_side = SCORE_FONT.render(f'{result1}', True, (255, 255, 255))
+            self.screen.blit(player_side, ((SCREEN_WIDTH - player_side.get_width()) // 4, self.starting_y + 70))
+            enemy_side = SCORE_FONT.render(f'{result2}', True, (255, 255, 255))
+            self.screen.blit(enemy_side, ((SCREEN_WIDTH - enemy_side.get_width()) // 4 * 3, self.starting_y + 70))
+
     def draw(self):
         self.screen.fill((0, 0, 0))
         self.draw_line()
         self.display_score_text()
+        self.display_winner_text()
         self.paddle1.draw(self.screen)
         self.paddle2.draw(self.screen)
         self.ball.draw(self.screen)
@@ -68,6 +83,9 @@ class Game:
                 self.player_score += 1
             self.respawn_ball()
 
+        if self.player_score == 3 or self.enemy_score == 3:
+            self.game_over = True
+
     def handle_collisions(self):
         if (self.ball.rect.colliderect(self.paddle1.rect) or
                 self.ball.rect.colliderect(self.paddle2.rect)):
@@ -78,14 +96,21 @@ class Game:
             self.ball.dy *= -1
 
     def update(self):
-        self.paddle1.update_paddle1()
-        self.paddle2.update_paddle2()
-        self.ball.update()
+        if not self.game_over:
+            self.paddle1.update_paddle1()
+            self.paddle2.update_paddle2()
+            self.ball.update()
 
     def events(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE and self.game_over:
+                    self.running = False
+                if event.key == pygame.K_r and self.game_over:
+                    self._initialize_game_state()
 
     def run(self):
         while self.running:
@@ -125,6 +150,7 @@ class Paddle:
 class Ball:
     def __init__(self, x, y):
         self.radius = 10
+        self.color = (255, 255, 255)
         self.rect = pygame.Rect(x, y, self.radius, self.radius)
         self.dx = random.choice([-6, 6])
         self.dy = random.choice([-3, 3])
@@ -135,7 +161,7 @@ class Ball:
         self.rect.y += self.dy
 
     def draw(self, screen):
-        pygame.draw.circle(screen, (0, 255, 0), self.rect.center, self.radius)
+        pygame.draw.circle(screen, self.color, self.rect.center, self.radius)
 
 
 def main():
