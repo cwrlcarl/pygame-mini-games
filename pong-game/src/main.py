@@ -1,10 +1,16 @@
 import pygame
 import random
+
 pygame.font.init()
 
 SCREEN_WIDTH, SCREEN_HEIGHT = 800, 600
 FPS = 60
 SCORE_FONT = pygame.font.SysFont('Monocraft', 50)
+WHITE = (235, 237, 245)
+BG_COLOR = (22, 23, 26)
+DIVIDER_COLOR = (64, 64, 64)
+PLAYER_PADDLE_COLOR = (51, 61, 196)
+ENEMY_PADDLE_COLOR = (196, 51, 63)
 
 class Game:
     def __init__(self):
@@ -19,37 +25,38 @@ class Game:
 
     def _initialize_game_state(self):
         self.starting_y = 55
-        self.paddle1 = Paddle(50, SCREEN_HEIGHT // 2, (0, 0, 255))
-        self.paddle2 = Paddle(SCREEN_WIDTH - 50, SCREEN_HEIGHT // 2, (255, 0, 0))
+        self.paddle1 = Paddle(50, SCREEN_HEIGHT // 2, PLAYER_PADDLE_COLOR)
+        self.paddle2 = Paddle(SCREEN_WIDTH - 50, SCREEN_HEIGHT // 2, ENEMY_PADDLE_COLOR)
         self._spawn_ball()
         self.player_score = 0
         self.enemy_score = 0
+        self.winning_score = 5
         self.game_over = False
 
     def draw_line(self):
         width, height, gap_size, x = 5, 15, 15, SCREEN_WIDTH // 2
         for dash in range(17):
             y = self.starting_y + dash * (height + gap_size)
-            pygame.draw.rect(self.screen, (64, 64, 64),
+            pygame.draw.rect(self.screen, DIVIDER_COLOR,
                              pygame.Rect(x, y, width, height))
 
     def display_score_text(self):
-        player_score = SCORE_FONT.render(f'{self.player_score}', True, (255, 255, 255))
+        player_score = SCORE_FONT.render(f'{self.player_score}', True, WHITE)
         self.screen.blit(player_score, ((SCREEN_WIDTH - player_score.get_width()) // 4, self.starting_y))
-        enemy_score = SCORE_FONT.render(f'{self.enemy_score}', True, (255, 255, 255))
+        enemy_score = SCORE_FONT.render(f'{self.enemy_score}', True, WHITE)
         self.screen.blit(enemy_score, ((SCREEN_WIDTH - enemy_score.get_width()) // 4 * 3, self.starting_y))
 
     def display_winner_text(self):
         if self.game_over:
-            result1 = "Win!" if self.player_score == 3 else "Lose!"
-            result2 = "Win!" if self.enemy_score == 3 else "Lose!"
-            player_side = SCORE_FONT.render(f'{result1}', True, (255, 255, 255))
+            result1 = "Win!" if self.player_score == self.winning_score else "Lose!"
+            result2 = "Win!" if self.enemy_score == self.winning_score else "Lose!"
+            player_side = SCORE_FONT.render(f'{result1}', True, WHITE)
             self.screen.blit(player_side, ((SCREEN_WIDTH - player_side.get_width()) // 4, self.starting_y + 70))
-            enemy_side = SCORE_FONT.render(f'{result2}', True, (255, 255, 255))
+            enemy_side = SCORE_FONT.render(f'{result2}', True, WHITE)
             self.screen.blit(enemy_side, ((SCREEN_WIDTH - enemy_side.get_width()) // 4 * 3, self.starting_y + 70))
 
     def draw(self):
-        self.screen.fill((0, 0, 0))
+        self.screen.fill(BG_COLOR)
         self.draw_line()
         self.display_score_text()
         self.display_winner_text()
@@ -75,15 +82,17 @@ class Game:
             if not self.ball.scored:
                 self.ball.scored = True
                 self.enemy_score += 1
-            self.respawn_ball()
+            if not self.game_over:
+                self.respawn_ball()
 
         if self.ball.rect.left > SCREEN_WIDTH:
             if not self.ball.scored:
                 self.ball.scored = True
                 self.player_score += 1
-            self.respawn_ball()
+            if not self.game_over:
+                self.respawn_ball()
 
-        if self.player_score == 3 or self.enemy_score == 3:
+        if self.player_score == self.winning_score or self.enemy_score == self.winning_score:
             self.game_over = True
 
     def handle_collisions(self):
@@ -150,7 +159,7 @@ class Paddle:
 class Ball:
     def __init__(self, x, y):
         self.radius = 10
-        self.color = (255, 255, 255)
+        self.color = WHITE
         self.rect = pygame.Rect(x, y, self.radius, self.radius)
         self.dx = random.choice([-6, 6])
         self.dy = random.choice([-3, 3])
