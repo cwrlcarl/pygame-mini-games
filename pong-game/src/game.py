@@ -94,12 +94,25 @@ class Game:
                 self.enemy_score == self.winning_score):
             self.game_over = True
 
+    def check_overlap(self, paddle):
+        overlap = self.ball.rect.centery - paddle.rect.centery
+        half_height = paddle.rect.height // 2
+        if abs(overlap) < 5:
+            self.ball.dy = 3 if self.ball.dy > 0 else -3
+        else:
+            self.ball.dy = max(-8, min(8, overlap / half_height * 8))
+
     def handle_collisions(self):
         if self.ball is not None:
-            if (self.ball.rect.colliderect(self.paddle1.rect) or
-                    self.ball.rect.colliderect(self.paddle2.rect)):
+            if self.ball.rect.colliderect(self.paddle1.rect):
                 self.ball.has_bounced = True
+                self.check_overlap(self.paddle1)
                 self.ball.dx *= -1
+            elif self.ball.rect.colliderect(self.paddle2.rect):
+                self.ball.has_bounced = True
+                self.check_overlap(self.paddle2)
+                self.ball.dx *= -1
+
             if (self.ball.rect.top < 0 or
                     self.ball.rect.bottom > SCREEN_HEIGHT):
                 self.ball.dy *= -1
