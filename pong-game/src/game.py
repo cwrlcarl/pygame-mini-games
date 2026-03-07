@@ -13,11 +13,12 @@ class Game:
         self.ui_starting_y = 55
         self.start_time = None
         self.game_over = None
+        self.ball = None
         self._initialize_game_state()
 
     def _initialize_game_state(self):
         self.ball = None
-        self.ball_speed = 10
+        self.ball_speed = 12
         self.paddle1 = Paddle(50, SCREEN_HEIGHT // 2, PLAYER_PADDLE_COLOR)
         self.paddle2 = Paddle(SCREEN_WIDTH - 50, SCREEN_HEIGHT // 2, ENEMY_PADDLE_COLOR)
         self.player_score = 0
@@ -71,28 +72,10 @@ class Game:
             self.start_time = pygame.time.get_ticks()
         current_time = pygame.time.get_ticks()
         elapsed_time = current_time - self.start_time
-        if elapsed_time > 1000:
+        if elapsed_time > 600:
+            SPAWN_SFX.play()
             self._spawn_ball()
             self.start_time = None
-
-    def handle_score(self):
-        if self.ball is not None:
-            if self.ball.rect.right < 0:
-                if not self.ball.scored:
-                    self.ball.scored = True
-                    self.enemy_score += 1
-                if not self.game_over:
-                    self.respawn_ball()
-            if self.ball.rect.left > SCREEN_WIDTH:
-                if not self.ball.scored:
-                    self.ball.scored = True
-                    self.player_score += 1
-                if not self.game_over:
-                    self.respawn_ball()
-
-        if (self.player_score == self.winning_score or
-                self.enemy_score == self.winning_score):
-            self.game_over = True
 
     def check_overlap(self, paddle):
         overlap = self.ball.rect.centery - paddle.rect.centery
@@ -102,19 +85,46 @@ class Game:
         else:
             self.ball.dy = max(-8, min(8, overlap / half_height * 8))
 
+    def handle_score(self):
+        if self.ball is not None:
+            if self.ball.rect.right < 0:
+                if not self.ball.scored:
+                    SCORE_SFX.play()
+                    self.ball.scored = True
+                    self.enemy_score += 1
+                    self.ball = None
+                if not self.game_over:
+                    self.respawn_ball()
+            elif self.ball.rect.left > SCREEN_WIDTH:
+                if not self.ball.scored:
+                    SCORE_SFX.play()
+                    self.ball.scored = True
+                    self.player_score += 1
+                    self.ball = None
+                if not self.game_over:
+                    self.respawn_ball()
+
+        if (self.player_score == self.winning_score or
+                self.enemy_score == self.winning_score) and not self.game_over:
+            GAME_OVER_SFX.play()
+            self.game_over = True
+
     def handle_collisions(self):
         if self.ball is not None:
             if self.ball.rect.colliderect(self.paddle1.rect):
+                PADDLE_HIT.play()
                 self.ball.has_bounced = True
                 self.check_overlap(self.paddle1)
                 self.ball.dx *= -1
             elif self.ball.rect.colliderect(self.paddle2.rect):
+                PADDLE_HIT.play()
                 self.ball.has_bounced = True
                 self.check_overlap(self.paddle2)
                 self.ball.dx *= -1
 
             if (self.ball.rect.top < 0 or
                     self.ball.rect.bottom > SCREEN_HEIGHT):
+                WALL_HIT.play()
                 self.ball.dy *= -1
 
             if self.ball.has_bounced:
@@ -126,8 +136,8 @@ class Game:
 
         if not self.game_over:
             self.paddle1.update_paddle1()
-            self.paddle2.update_paddle2()
             if self.ball is not None:
+                self.paddle2.update_ai(self.ball)
                 self.ball.update()
 
     def events(self):
