@@ -1,4 +1,5 @@
 import pygame
+import os
 
 SCREEN_WIDTH, SCREEN_HEIGHT = 600, 700
 FPS = 60
@@ -9,6 +10,12 @@ GRID_TOP = 150
 ROWS, COLS = 3, 3
 CELL_SIZE = PANEL_SIZE // COLS
 LINE_WIDTH = 5
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+ASSETS_DIR = os.path.join(BASE_DIR, 'assets')
+X_IMG = os.path.join(ASSETS_DIR, 'x-img.png')
+O_IMG = os.path.join(ASSETS_DIR, 'o-img.png')
+
 TEXT_COLOR = (214, 216, 218)
 LINE_COLOR = (106, 113, 124)
 BG_COLOR = (36, 41, 46)
@@ -16,10 +23,12 @@ BG_COLOR = (36, 41, 46)
 
 class TicTacToe:
     def __init__(self):
-        self.x_o = 'x'
+        self.board = [[None]*3, [None]*3, [None]*3]
+        self.turn = 'x'
         self.winner = None
         self.draw = None
-        self.board = [[None]*3, [None]*3, [None]*3]
+        self.x_img = pygame.image.load(X_IMG)
+        self.o_img = pygame.image.load(O_IMG)
 
     @staticmethod
     def draw_layout(screen):
@@ -27,6 +36,16 @@ class TicTacToe:
             pygame.draw.line(screen, LINE_COLOR, (MARGIN, GRID_TOP + i * CELL_SIZE), (PANEL_SIZE + MARGIN, GRID_TOP + i * CELL_SIZE), LINE_WIDTH)
         for i in range(1, COLS):
             pygame.draw.line(screen, LINE_COLOR, (MARGIN + i * CELL_SIZE, GRID_TOP), (MARGIN + i * CELL_SIZE, GRID_TOP + PANEL_SIZE), LINE_WIDTH)
+
+    def handle_click(self, row, col):
+        if self.board[row][col] is None:
+            if self.turn == 'x':
+                self.board[row][col] = 'x'
+                self.turn = 'o'
+            else:
+                self.board[row][col] = 'o'
+                self.turn = 'x'
+            print(f'Board: {self.board}')
 
 
 class Game:
@@ -43,9 +62,6 @@ class Game:
         self.tictactoe.draw_layout(self.screen)
         pygame.display.update()
 
-    def update(self):
-        pass
-
     def events(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -55,7 +71,9 @@ class Game:
                 if event.button == 1:
                     x, y = event.pos
                     row, col = (y - GRID_TOP) // CELL_SIZE, (x - MARGIN) // CELL_SIZE
-                    print(f'Row{row} Col{col}')
+                    if 0 <= row < ROWS and 0 <= col < COLS:
+                        self.tictactoe.handle_click(row, col)
+                        print(f'Row: {row}, Col: {col}\n')
 
     def run(self):
         while self.running:
