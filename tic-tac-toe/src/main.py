@@ -27,8 +27,8 @@ class TicTacToe:
         self.turn = 'x'
         self.winner = None
         self.draw = None
-        self.x_img = pygame.image.load(X_IMG)
-        self.o_img = pygame.image.load(O_IMG)
+        self.x_img = pygame.transform.scale(pygame.image.load(X_IMG), (CELL_SIZE, CELL_SIZE))
+        self.o_img = pygame.transform.scale(pygame.image.load(O_IMG), (CELL_SIZE, CELL_SIZE))
 
     @staticmethod
     def draw_layout(screen):
@@ -37,6 +37,16 @@ class TicTacToe:
         for i in range(1, COLS):
             pygame.draw.line(screen, LINE_COLOR, (MARGIN + i * CELL_SIZE, GRID_TOP), (MARGIN + i * CELL_SIZE, GRID_TOP + PANEL_SIZE), LINE_WIDTH)
 
+    def draw_XO(self, screen):
+        for row in range(ROWS):
+            for col in range(COLS):
+                x = MARGIN + col * CELL_SIZE
+                y = GRID_TOP + row * CELL_SIZE
+                if self.board[row][col] == 'x':
+                    screen.blit(self.x_img, (x, y))
+                elif self.board[row][col] == 'o':
+                    screen.blit(self.o_img, (x, y))
+                    
     def handle_click(self, row, col):
         if self.board[row][col] is None:
             if self.turn == 'x':
@@ -60,6 +70,7 @@ class Game:
     def draw(self):
         self.screen.fill(BG_COLOR)
         self.tictactoe.draw_layout(self.screen)
+        self.tictactoe.draw_XO(self.screen)
         pygame.display.update()
 
     def events(self):
@@ -73,7 +84,6 @@ class Game:
                     row, col = (y - GRID_TOP) // CELL_SIZE, (x - MARGIN) // CELL_SIZE
                     if 0 <= row < ROWS and 0 <= col < COLS:
                         self.tictactoe.handle_click(row, col)
-                        print(f'Row: {row}, Col: {col}\n')
 
     def run(self):
         while self.running:
