@@ -13,8 +13,9 @@ class Game:
 
     def draw(self):
         self.screen.fill(BG_COLOR)
-        self.tictactoe.draw_layout(self.screen)
+        self.tictactoe.draw_grid(self.screen)
         self.tictactoe.draw_XO(self.screen)
+        self.tictactoe.render_turn_text(self.screen)
         pygame.display.update()
 
     def events(self):
