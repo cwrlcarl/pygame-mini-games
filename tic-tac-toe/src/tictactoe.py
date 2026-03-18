@@ -43,3 +43,14 @@ class TicTacToe:
                 self.board[row][col] = 'o'
                 self.turn = 'x'
             print(f'Board: {self.board}')
+
+    def check_winner(self):
+        for row in range(ROWS):
+            if self.board[row][0] == self.board[row][1] == self.board[row][2] and self.board[row][0] is not None:
+                self.winner = self.board[row][0]
+                print(f'{self.winner.upper()} won at row {row}')
+
+        for col in range(COLS):
+            if self.board[0][col] == self.board[1][col] == self.board[2][col] and self.board[0][col] is not None:
+                self.winner = self.board[0][col]
+                print(f'{self.winner.upper()} won at column {col}')
