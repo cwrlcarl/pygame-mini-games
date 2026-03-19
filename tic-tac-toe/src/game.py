@@ -9,13 +9,39 @@ class Game:
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
         self.clock = pygame.time.Clock()
         self.running = True
+        self.x_img = pygame.transform.scale(pygame.image.load(X_IMG), (CELL_SIZE, CELL_SIZE))
+        self.o_img = pygame.transform.scale(pygame.image.load(O_IMG), (CELL_SIZE, CELL_SIZE))
+        self.winner = None
         self.tictactoe = TicTacToe()
+
+    def draw_grid(self):
+        for i in range(1, ROWS):
+            pygame.draw.line(self.screen, LINE_COLOR, (MARGIN, GRID_TOP + i * CELL_SIZE),
+                             (PANEL_SIZE + MARGIN, GRID_TOP + i * CELL_SIZE), LINE_WIDTH)
+        for i in range(1, COLS):
+            pygame.draw.line(self.screen, LINE_COLOR, (MARGIN + i * CELL_SIZE, GRID_TOP),
+                             (MARGIN + i * CELL_SIZE, GRID_TOP + PANEL_SIZE), LINE_WIDTH)
+
+    def draw_XO(self):
+        for row in range(ROWS):
+            for col in range(COLS):
+                x = MARGIN + col * CELL_SIZE
+                y = GRID_TOP + row * CELL_SIZE
+                if self.tictactoe.get_board()[row][col] == 'x':
+                    self.screen.blit(self.x_img, (x, y))
+                elif self.tictactoe.get_board()[row][col] == 'o':
+                    self.screen.blit(self.o_img, (x, y))
+
+    def render_turn_text(self):
+        turn_text = TEXT_FONT.render(f'{self.tictactoe.get_turn()} Turn', True, TEXT_COLOR)
+        self.screen.blit(turn_text, ((SCREEN_WIDTH - turn_text.get_width()) // 2,
+                                (GRID_TOP - turn_text.get_height()) // 2))
 
     def draw(self):
         self.screen.fill(BG_COLOR)
-        self.tictactoe.draw_grid(self.screen)
-        self.tictactoe.draw_XO(self.screen)
-        self.tictactoe.render_turn_text(self.screen)
+        self.draw_grid()
+        self.draw_XO()
+        self.render_turn_text()
         pygame.display.update()
 
     def events(self):
@@ -29,6 +55,10 @@ class Game:
                     row, col = (y - GRID_TOP) // CELL_SIZE, (x - MARGIN) // CELL_SIZE
                     if 0 <= row < ROWS and 0 <= col < COLS:
                         self.tictactoe.handle_click(row, col)
+                        winner = self.tictactoe.check_winner()
+                        if winner:
+                            self.winner = winner
+                            print(self.winner)
 
     def run(self):
         while self.running:
