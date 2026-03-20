@@ -12,6 +12,7 @@ class Game:
         self.x_img = pygame.transform.scale(pygame.image.load(X_IMG), (CELL_SIZE, CELL_SIZE))
         self.o_img = pygame.transform.scale(pygame.image.load(O_IMG), (CELL_SIZE, CELL_SIZE))
         self.winner = None
+        self.line = None
         self.tictactoe = TicTacToe()
 
     def draw_grid(self):
@@ -32,6 +33,20 @@ class Game:
                 elif self.tictactoe.get_board()[row][col] == 'o':
                     self.screen.blit(self.o_img, (x, y))
 
+    def draw_winner(self):
+        if self.line:
+            line_type, line_index = self.line
+            if line_type == 'row':
+                pygame.draw.line(self.screen, LINE_COLOR,
+                                (MARGIN, GRID_TOP + line_index * CELL_SIZE + CELL_SIZE // 2),
+                                (MARGIN + PANEL_SIZE, GRID_TOP + line_index * CELL_SIZE + CELL_SIZE // 2),
+                                LINE_WIDTH)
+            elif line_type == 'col':
+                pygame.draw.line(self.screen, LINE_COLOR,
+                                (MARGIN + line_index * CELL_SIZE + CELL_SIZE // 2, GRID_TOP),
+                                (MARGIN + line_index * CELL_SIZE + CELL_SIZE // 2, GRID_TOP + PANEL_SIZE),
+                                LINE_WIDTH)
+
     def render_turn_text(self):
         turn_text = TEXT_FONT.render(f'{self.tictactoe.get_turn()} Turn', True, TEXT_COLOR)
         self.screen.blit(turn_text, ((SCREEN_WIDTH - turn_text.get_width()) // 2,
@@ -41,6 +56,7 @@ class Game:
         self.screen.fill(BG_COLOR)
         self.draw_grid()
         self.draw_XO()
+        self.draw_winner()
         self.render_turn_text()
         pygame.display.update()
 
@@ -55,9 +71,10 @@ class Game:
                     row, col = (y - GRID_TOP) // CELL_SIZE, (x - MARGIN) // CELL_SIZE
                     if 0 <= row < ROWS and 0 <= col < COLS:
                         self.tictactoe.handle_click(row, col)
-                        winner = self.tictactoe.check_winner()
+                        winner, line = self.tictactoe.check_winner()
                         if winner:
                             self.winner = winner
+                            self.line = line
                             print(self.winner)
 
     def run(self):
