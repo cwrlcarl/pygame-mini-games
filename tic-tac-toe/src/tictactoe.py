@@ -22,11 +22,21 @@ class TicTacToe:
 
     def check_winner(self):
         for row in range(ROWS):
-            if self.board[row][0] == self.board[row][1] == self.board[row][2] and self.board[row][0] is not None:
+            if (self.board[row][0] == self.board[row][1] == self.board[row][2]
+                    and self.board[row][0] is not None):
                 return self.board[row][0], ('row', row)
 
         for col in range(COLS):
-            if self.board[0][col] == self.board[1][col] == self.board[2][col] and self.board[0][col] is not None:
+            if (self.board[0][col] == self.board[1][col] == self.board[2][col]
+                    and self.board[0][col] is not None):
                 return self.board[0][col], ('col', col)
+            
+        if (self.board[0][0] == self.board[1][1] == self.board[2][2]
+                and self.board[0][0] is not None):
+            return self.board[0][0], ('diag', 0)
+        
+        if (self.board[0][2] == self.board[1][1] == self.board[2][0]
+                and self.board[0][2] is not None):
+            return self.board[0][2], ('diag', 1)
         
         return None, None
