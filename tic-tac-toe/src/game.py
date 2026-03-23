@@ -37,15 +37,33 @@ class Game:
         if self.line:
             line_type, line_index = self.line
             if line_type == 'row':
-                pygame.draw.line(self.screen, LINE_COLOR,
-                                (MARGIN, GRID_TOP + line_index * CELL_SIZE + CELL_SIZE // 2),
-                                (MARGIN + PANEL_SIZE, GRID_TOP + line_index * CELL_SIZE + CELL_SIZE // 2),
-                                LINE_WIDTH)
+                pygame.draw.line(
+                    self.screen, LINE_COLOR,
+                    (MARGIN, GRID_TOP + line_index * CELL_SIZE + CELL_SIZE // 2),
+                    (MARGIN + PANEL_SIZE, GRID_TOP + line_index * CELL_SIZE + CELL_SIZE // 2),
+                    LINE_WIDTH
+                )
             elif line_type == 'col':
-                pygame.draw.line(self.screen, LINE_COLOR,
-                                (MARGIN + line_index * CELL_SIZE + CELL_SIZE // 2, GRID_TOP),
-                                (MARGIN + line_index * CELL_SIZE + CELL_SIZE // 2, GRID_TOP + PANEL_SIZE),
-                                LINE_WIDTH)
+                pygame.draw.line(
+                    self.screen, LINE_COLOR,
+                    (MARGIN + line_index * CELL_SIZE + CELL_SIZE // 2, GRID_TOP),
+                    (MARGIN + line_index * CELL_SIZE + CELL_SIZE // 2, GRID_TOP + PANEL_SIZE),
+                    LINE_WIDTH
+                )
+            elif line_type == 'diag' and line_index == 0:
+                pygame.draw.line(
+                    self.screen, LINE_COLOR,
+                    (MARGIN + CELL_SIZE // 2, GRID_TOP + CELL_SIZE // 2),
+                    (MARGIN + PANEL_SIZE - CELL_SIZE // 2, GRID_TOP + PANEL_SIZE - CELL_SIZE // 2),
+                    LINE_WIDTH
+                )
+            elif line_type == 'diag' and line_index == 1:
+                pygame.draw.line(
+                    self.screen, LINE_COLOR,
+                    (MARGIN + PANEL_SIZE - CELL_SIZE // 2, GRID_TOP + CELL_SIZE // 2),
+                    (MARGIN + CELL_SIZE // 2, GRID_TOP + PANEL_SIZE - CELL_SIZE // 2),
+                    LINE_WIDTH
+                )
 
     def render_turn_text(self):
         turn_text = TEXT_FONT.render(f'{self.tictactoe.get_turn()} Turn', True, TEXT_COLOR)
@@ -75,7 +93,6 @@ class Game:
                         if winner:
                             self.winner = winner
                             self.line = line
-                            print(self.winner)
 
     def run(self):
         while self.running:
