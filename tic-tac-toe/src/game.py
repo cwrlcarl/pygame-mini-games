@@ -13,6 +13,8 @@ class Game:
         self.o_img = pygame.transform.scale(pygame.image.load(O_IMG), (CELL_SIZE, CELL_SIZE))
         self.winner = None
         self.line = None
+        self.x_score = 0
+        self.o_score = 0
         self.tictactoe = TicTacToe()
 
     def draw_grid(self):
@@ -41,34 +43,36 @@ class Game:
                     self.screen, LINE_COLOR,
                     (MARGIN, GRID_TOP + line_index * CELL_SIZE + CELL_SIZE // 2),
                     (MARGIN + PANEL_SIZE, GRID_TOP + line_index * CELL_SIZE + CELL_SIZE // 2),
-                    LINE_WIDTH
-                )
+                    LINE_WIDTH)
             elif line_type == 'col':
                 pygame.draw.line(
                     self.screen, LINE_COLOR,
                     (MARGIN + line_index * CELL_SIZE + CELL_SIZE // 2, GRID_TOP),
                     (MARGIN + line_index * CELL_SIZE + CELL_SIZE // 2, GRID_TOP + PANEL_SIZE),
-                    LINE_WIDTH
-                )
+                    LINE_WIDTH)
             elif line_type == 'diag' and line_index == 0:
                 pygame.draw.line(
                     self.screen, LINE_COLOR,
                     (MARGIN + CELL_SIZE // 2, GRID_TOP + CELL_SIZE // 2),
                     (MARGIN + PANEL_SIZE - CELL_SIZE // 2, GRID_TOP + PANEL_SIZE - CELL_SIZE // 2),
-                    LINE_WIDTH
-                )
+                    LINE_WIDTH)
             elif line_type == 'diag' and line_index == 1:
                 pygame.draw.line(
                     self.screen, LINE_COLOR,
                     (MARGIN + PANEL_SIZE - CELL_SIZE // 2, GRID_TOP + CELL_SIZE // 2),
                     (MARGIN + CELL_SIZE // 2, GRID_TOP + PANEL_SIZE - CELL_SIZE // 2),
-                    LINE_WIDTH
-                )
+                    LINE_WIDTH)
 
     def render_turn_text(self):
-        turn_text = TEXT_FONT.render(f'{self.tictactoe.get_turn()} Turn', True, TEXT_COLOR)
-        self.screen.blit(turn_text, ((SCREEN_WIDTH - turn_text.get_width()) // 2,
-                                (GRID_TOP - turn_text.get_height()) // 2))
+        if self.winner:
+            turn_text = TEXT_FONT.render(f'{self.winner.upper()} Won', True, TEXT_COLOR)
+        else:
+            turn_text = TEXT_FONT.render(f'{self.tictactoe.get_turn()} Turn', True, TEXT_COLOR)
+        
+        self.screen.blit(
+            turn_text, 
+            ((SCREEN_WIDTH - turn_text.get_width()) // 2, 
+            (GRID_TOP - turn_text.get_height()) // 2))
 
     def draw(self):
         self.screen.fill(BG_COLOR)
@@ -84,15 +88,23 @@ class Game:
                 self.running = False
 
             if event.type == pygame.MOUSEBUTTONDOWN:
+                if self.winner: return
+
                 if event.button == 1:
                     x, y = event.pos
                     row, col = (y - GRID_TOP) // CELL_SIZE, (x - MARGIN) // CELL_SIZE
                     if 0 <= row < ROWS and 0 <= col < COLS:
                         self.tictactoe.handle_click(row, col)
                         winner, line = self.tictactoe.check_winner()
-                        if winner:
+                        if winner and not self.winner:
                             self.winner = winner
                             self.line = line
+                            if winner == 'x':
+                                self.x_score += 1
+                                print(f'{winner.upper()}: {self.x_score}')
+                            else:
+                                self.o_score += 1
+                                print(f'{winner.upper()}: {self.o_score}')
 
     def run(self):
         while self.running:
