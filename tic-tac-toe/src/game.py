@@ -63,6 +63,17 @@ class Game:
                     (MARGIN + CELL_SIZE // 2, GRID_TOP + PANEL_SIZE - CELL_SIZE // 2),
                     LINE_WIDTH)
 
+    def render_score_texts(self):
+        x_display = '-' if self.x_score == 0 else self.x_score
+        x_score_text = TEXT_FONT.render(f'X   {x_display}', True, TEXT_COLOR)
+        x_score_rect = x_score_text.get_rect(midleft=(MARGIN, SCREEN_HEIGHT - (GRID_TOP // 2)))
+        self.screen.blit(x_score_text, x_score_rect)
+
+        o_display = '-' if self.o_score == 0 else self.o_score
+        o_score_text = TEXT_FONT.render(f'O   {o_display}', True, TEXT_COLOR)
+        o_score_rect = o_score_text.get_rect(midright=(MARGIN + PANEL_SIZE, SCREEN_HEIGHT - (GRID_TOP // 2)))
+        self.screen.blit(o_score_text, o_score_rect)
+
     def render_turn_text(self):
         if self.winner:
             turn_text = TEXT_FONT.render(f'{self.winner.upper()} Won', True, TEXT_COLOR)
@@ -80,6 +91,7 @@ class Game:
         self.draw_XO()
         self.draw_winner()
         self.render_turn_text()
+        self.render_score_texts()
         pygame.display.update()
 
     def events(self):
