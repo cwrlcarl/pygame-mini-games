@@ -1,9 +1,10 @@
+import random as rd
 from settings import *
 
 class TicTacToe:
     def __init__(self):
         self.board = [[None]*3, [None]*3, [None]*3]
-        self.turn = 'x'
+        self.turn = rd.choice(['x', 'o'])
 
     def get_board(self):
         return self.board

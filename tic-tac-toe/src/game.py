@@ -17,6 +17,11 @@ class Game:
         self.o_score = 0
         self.tictactoe = TicTacToe()
 
+    def restart_game(self):
+        self.winner = None
+        self.line = None
+        self.tictactoe = TicTacToe()
+
     def draw_grid(self):
         for i in range(1, ROWS):
             pygame.draw.line(self.screen, LINE_COLOR, (MARGIN, GRID_TOP + i * CELL_SIZE),
@@ -113,10 +118,12 @@ class Game:
                             self.line = line
                             if winner == 'x':
                                 self.x_score += 1
-                                print(f'{winner.upper()}: {self.x_score}')
                             else:
                                 self.o_score += 1
-                                print(f'{winner.upper()}: {self.o_score}')
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_r and self.winner:
+                    self.restart_game()
 
     def run(self):
         while self.running:
